@@ -1,10 +1,13 @@
 from pathlib import Path
 from tkinter import *
+from tkinter import messagebox
 import tkinter as tk
-from PIL import Image
+#from PIL import Image
 from create_account import show_create_account
-#from reset_password import show_reset_password
+from reset_password import show_reset_password
+from home_screen import show_home_screen
 
+#def show_login_screen(db_conn):
 def show_login_screen():
 
     OUTPUT_PATH = Path(__file__).parent
@@ -128,6 +131,7 @@ def show_login_screen():
     # links and functions for create account and reset password
     def navigate_to_create_account():
         window.destroy()
+        #show_create_account(db_conn)
         show_create_account()
 
     create_account_link = tk.Button(window, text="Create New Account", font=("Inter Bold", 14 * -1, "underline"), \
@@ -135,7 +139,9 @@ def show_login_screen():
     create_account_link.place(x=468, y=360)
 
     def navigate_to_reset_passsword():
-        print("Forgot Password link clicked")
+        window.destroy()
+        #show_reset_password(db_conn)
+        show_reset_password()
 
     reset_password_link = tk.Button(window, text="Forgot Password", font=("Inter Bold", 14 * -1, "underline"), \
                                     fg="#ffffff", activeforeground="#284846", bg="#4EB276", activebackground="#4EB276", bd=0, command=navigate_to_reset_passsword)
@@ -143,9 +149,19 @@ def show_login_screen():
 
     # login button and function
     def login():
-        print("username = " + username_input.get())
-        print("password = " + password_input.get())
-        print("Log In button clicked")
+        # just placeholder code, the user_info passed to home_screen will be in associative array form already, returns that way from db query
+        username = username_input.get()
+        password = password_input.get()
+        print("username = " + username)
+        print("password = " + password)
+        if (username == "user") and (password == "password"):
+            user_info = {'username': username}
+            window.destroy()
+            #show_home_screen(db_conn, user_info)
+            show_home_screen(user_info)
+        else:
+            messagebox.showwarning("Invalid Credentials", "Incorrect username or password.")
+            print("log in with 'user' and 'password'")
 
     login_button = Button(
         image=button_image_1,
