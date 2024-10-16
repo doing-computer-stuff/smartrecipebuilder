@@ -1,9 +1,8 @@
 from pathlib import Path
 from tkinter import *
-from utilities import *
-import mysql.connector
 
-def show_home_screen(ing_db_conn, user_info):
+#def show_home_screen(db_conn, user_info):
+def show_home_screen(user_info):
 
     OUTPUT_PATH = Path(__file__).parent
     ASSETS_PATH = OUTPUT_PATH / Path(r"assets/home_screen")
@@ -62,14 +61,14 @@ def show_home_screen(ing_db_conn, user_info):
         file=relative_to_assets("entry_1.png"))
 
     entry_bg_1 = canvas.create_image(
-        248.0,
-        401.0,
+        250.0,
+        400.0,
         image=entry_image_1
     )
 
     canvas.create_text(
-        227.0,
-        49.0,
+        230.0,
+        50.0,
         anchor="nw",
         text="Smart Recipe Builder",
         fill="#FFFFFF",
@@ -77,36 +76,50 @@ def show_home_screen(ing_db_conn, user_info):
     )
     canvas.create_text(
         320.0,
-        108.0,
+        110.0,
         anchor="nw",
         text=user_info['username'] + "’s Ingredients",
         fill="#FFFFFF",
         font=("Inter Bold", 20 * -1)
     )
 
-    # Put the table here?
-    # How to create a table?
-    # How to place one here?
-    # How to populate it with data?
-
-    # Use the db_conn to access and interact with the data.
     inventory_table = Text(
-        bd=0,
-        bg="#D9D9D9",
-        fg="#000716",
+        bd=0,           #boarder width
+        bg="#D9D9D9",   #background
+        fg="#000716",   #foreground
         highlightthickness=0
     )
     inventory_table.place(
-        x=98.0,
-        y=201.0,
-        width=300.0,
-        height=398.0
+        x=70.0,
+        y=200.0,
+        width=350.0,
+        height=400.0
     )
-    inventory_table.insert(0.0, "change to a table")
+
+    headers = ["Product", "Expiration Date", "Quantity"]
+    header_format = "{:<13} {:<20} {:<5}\n".format(*headers)  # spacing between each header
+    inventory_table.insert(END, header_format)
+    inventory_table.insert(END, "-" * 43 + "\n")  # Line between header and ingredients
+
+    #starting ingredients
+    rows = [
+        ["Apples", "10/25/2024", "3"],
+        ["Lettuce", "10/27/2024", "3 cups"]
+    ]
+
+    def inserting_rows(product, expiration, quantity):
+        rows_format = "{:13} {:20} {:5}\n".format(product, expiration, quantity) # format rows to match headers
+        inventory_table.insert(END, rows_format)
+
+    for row in rows:    # loop through rows defined above
+        inserting_rows(row[0], row[1], row[2])
+
+
 
     def navigate_to_login_screen():
         from login import show_login_screen
         window.destroy()
+        # show_login_screen(db_conn)
         show_login_screen()
 
     logout_button = Button(
@@ -118,9 +131,9 @@ def show_home_screen(ing_db_conn, user_info):
     )
     logout_button.place(
         x=16.0,
-        y=726.1666870117188,
+        y=726.0,
         width=88.0,
-        height=22.208332061767578
+        height=22.0
     )
 
     def navigate_to_find_new_recipes_screen():
@@ -135,9 +148,9 @@ def show_home_screen(ing_db_conn, user_info):
     )
     find_new_recipe_button.place(
         x=44.0,
-        y=672.4375,
+        y=672.0,
         width=150.0,
-        height=33.3125
+        height=33.0
     )
 
     def navigate_to_saved_recipes_screen():
@@ -152,9 +165,9 @@ def show_home_screen(ing_db_conn, user_info):
     )
     saved_recipes_button.place(
         x=221.0,
-        y=672.4375,
-        width=146.9178009033203,
-        height=33.3125
+        y=672.0,
+        width=146.0,
+        height=33.0
     )
 
     def navigate_to_add_recipe_screen():
@@ -169,12 +182,11 @@ def show_home_screen(ing_db_conn, user_info):
     )
     add_recipe_button.place(
         x=401.0,
-        y=672.4375,
+        y=672.0,
         width=150.0,
-        height=33.3125
+        height=33.0
     )
 
-    # Use the ing_db_conn and user_id to interact with specifed users data.
     def navigate_to_input_ingredients_screen():
         print("Input Ingredients button clicked")
 
@@ -187,9 +199,9 @@ def show_home_screen(ing_db_conn, user_info):
     )
     input_ingredients_button.place(
         x=578.0,
-        y=671.4375,
+        y=671.0,
         width=150.0,
-        height=33.3125
+        height=33.0
     )
 
     button_image_hover_1 = PhotoImage(
