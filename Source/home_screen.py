@@ -1,8 +1,7 @@
 from pathlib import Path
 from tkinter import *
 
-#def show_home_screen(db_conn, user_info):
-def show_home_screen(user_info):
+def show_home_screen(db_conn, user_info):
 
     OUTPUT_PATH = Path(__file__).parent
     ASSETS_PATH = OUTPUT_PATH / Path(r"assets/home_screen")
@@ -78,7 +77,7 @@ def show_home_screen(user_info):
         320.0,
         110.0,
         anchor="nw",
-        text=user_info['username'] + "’s Ingredients",
+        text=user_info[0]['username'] + "’s Ingredients",
         fill="#FFFFFF",
         font=("Inter Bold", 20 * -1)
     )
@@ -119,8 +118,7 @@ def show_home_screen(user_info):
     def navigate_to_login_screen():
         from login import show_login_screen
         window.destroy()
-        # show_login_screen(db_conn)
-        show_login_screen()
+        show_login_screen(db_conn)
 
     logout_button = Button(
         image=button_image_1,
@@ -188,7 +186,9 @@ def show_home_screen(user_info):
     )
 
     def navigate_to_input_ingredients_screen():
-        print("Input Ingredients button clicked")
+        from input_ingredients import show_input_ingredients_screen
+        window.destroy()
+        show_input_ingredients_screen(db_conn, user_info)
 
     input_ingredients_button = Button(
         image=button_image_3,
