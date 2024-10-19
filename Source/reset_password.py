@@ -4,7 +4,7 @@ from tkinter import messagebox
 import mysql.connector
 from utilities import *
 
-def show_reset_password():
+def show_reset_password(db_conn):
 
     OUTPUT_PATH = Path(__file__).parent
     ASSETS_PATH = OUTPUT_PATH / Path(r"assets/reset_password_screen")
@@ -149,8 +149,6 @@ def show_reset_password():
         # If the provided passwords match, connect to the user database
         # and update the password of the user.
         if new_password_input.get() == confirm_new_password.get():
-            # Connect to user database.
-            db_conn = connect_to_database()
 
             # Create a cursor to execute SQL commands.
             cursor = db_conn.cursor()
@@ -159,10 +157,9 @@ def show_reset_password():
             cursor.execute("UPDATE users SET user_password = %s WHERE username = %s",
             (new_password, username))
             
-            # Commit changes to the database and close connections to cursor and database.
+            # Commit changes to the database and close connection to cursor.
             db_conn.commit()
             cursor.close()
-            db_conn.close()
 
             messagebox.showinfo("Success", "Password successfully changed.")
             navigate_to_login_screen()
@@ -187,7 +184,7 @@ def show_reset_password():
     def navigate_to_login_screen():
         from login import show_login_screen
         window.destroy()
-        show_login_screen()
+        show_login_screen(db_conn)
 
     back_button = Button(
         image=button_image_2,
