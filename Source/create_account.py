@@ -4,7 +4,7 @@ from tkinter import messagebox
 import mysql.connector
 from utilities import *
 
-def show_create_account():
+def show_create_account(db_conn):
 
     OUTPUT_PATH = Path(__file__).parent
     ASSETS_PATH = OUTPUT_PATH / Path(r"assets/create_account_screen")
@@ -159,8 +159,6 @@ def show_create_account():
     def create_account():
         # Getting it through the console?
         if (username_input.get() != "") and (password_input.get() != "") and (password_input.get() == confirm_password_input.get()):
-            # Connect to the user database.
-            db_conn = connect_to_database()
 
             # Create a cursor to execute SQL commands.
             cursor = db_conn.cursor()
@@ -169,10 +167,9 @@ def show_create_account():
             cursor.execute("INSERT INTO users (username, user_password) VALUES (%s, %s)",
                 (username_input.get(), password_input.get()))
 
-            # Commit changes to the database and close connections to cursor and database.
+            # Commit changes to the database and close connection to cursor.
             db_conn.commit()
             cursor.close()
-            db_conn.close()
 
             messagebox.showinfo("Success", "You have successfully created an account!")
             navigate_to_login_screen()
@@ -197,7 +194,7 @@ def show_create_account():
     def navigate_to_login_screen():
         from login import show_login_screen
         window.destroy()
-        show_login_screen()
+        show_login_screen(db_conn)
 
     back_button = Button(
         image=button_image_2,
