@@ -1,6 +1,5 @@
 from pathlib import Path
 from tkinter import *
-import mysql.connector
 
 def show_home_screen(db_conn, username, user_id):
 
@@ -113,7 +112,7 @@ def show_home_screen(db_conn, username, user_id):
     results = cursor.fetchall()
 
     def inserting_rows(product, expiration, quantity):
-        rows_format = "{:13} {:} {:5}\n".format(product, expiration, quantity) # format rows to match headers
+        rows_format = "{:13} {:} {:15}\n".format(product, expiration, quantity) # format rows to match headers
         inventory_table.insert(END, rows_format)
 
     for row in results:    # loop through rows defined above
