@@ -150,17 +150,15 @@ def show_login_screen(db_conn):
     # Method to check whether the given username and password are in the database.
     def get_user_info(username):
         # Create a cursor to execute SQL commands.
-        cursor = db_conn.cursor(dictionary = True)
+        cursor = db_conn.cursor(dictionary=True)
 
         # Execute query to see whether user exists.
-        cursor.execute(
-        "SELECT * FROM users WHERE username = %s",
-        (username,))
+        cursor.execute(f"SELECT username, user_id FROM users WHERE username = '{username}'")
 
         # Grab the id of the user
         # This could cause issues or incorrect behavior if 
         # usernames are not unique
-        result = cursor.fetchall()
+        result = cursor.fetchone()
 
         # Commit changes to the database and close connection to cursor.
         cursor.close()
@@ -206,7 +204,7 @@ def show_login_screen(db_conn):
             window.destroy()
 
             # Pass the database connection and user ID here.
-            show_home_screen(db_conn, user_info)
+            show_home_screen(db_conn, user_info['username'], user_info['user_id'])
         else:
             messagebox.showwarning("Invalid Credentials", "Incorrect username or password.")
             print("log in with 'user' and 'password'")
