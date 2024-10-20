@@ -1,8 +1,7 @@
 from pathlib import Path
 from tkinter import *
 from tkinter import messagebox
-import mysql.connector
-from utilities import *
+
 
 def show_reset_password(db_conn):
 
@@ -113,7 +112,7 @@ def show_reset_password(db_conn):
     )
     username_input.place(
         x=232.0,
-        y=341.0,
+        y=190.0,
         width=235.0,
         height=39.0
     )
@@ -139,7 +138,7 @@ def show_reset_password(db_conn):
     )
     confirm_new_password_input.place(
         x=232.0,
-        y=190.0,
+        y=341.0,
         width=235.0,
         height=39.0
     )
@@ -148,14 +147,39 @@ def show_reset_password(db_conn):
     def password_reset():
         # If the provided passwords match, connect to the user database
         # and update the password of the user.
-        if new_password_input.get() == confirm_new_password.get():
+
+        def valid_username(username):
+            # Verify that the username exists in the db
+            cursor = db_conn.cursor()
+            cursor.execute(f"SELECT COUNT(*) FROM users WHERE username = '{username}';")
+            result = cursor.fetchone()
+            cursor.close()
+            if result[0] == 0:
+                return False
+            return True
+
+        username = username_input.get()
+        if username == "":
+            messagebox.showwarning("No Username Entered", "Please enter a username.")
+            return
+
+        if not valid_username(username):
+            messagebox.showwarning("Invalid Username", "Username does not exit.")
+            return
+
+        new_password = new_password_input.get()
+        if new_password == "":
+            messagebox.showwarning("No Password Entered", "Please enter a new password.")
+            return
+
+        confirm_password = confirm_new_password_input.get()
+        if new_password == confirm_password:
 
             # Create a cursor to execute SQL commands.
             cursor = db_conn.cursor()
 
             # Execute query to update users password.
-            cursor.execute("UPDATE users SET user_password = %s WHERE username = %s",
-            (new_password, username))
+            cursor.execute(f"UPDATE users SET user_password = '{new_password}' WHERE username = '{username}'")
             
             # Commit changes to the database and close connection to cursor.
             db_conn.commit()
@@ -164,8 +188,7 @@ def show_reset_password(db_conn):
             messagebox.showinfo("Success", "Password successfully changed.")
             navigate_to_login_screen()
         else:
-            messagebox.showinfo("Error", "Passwords do not match.")
-            navigate_to_login_screen()
+            messagebox.showwarning("Error", "Passwords do not match.")
 
     reset_button = Button(
         image=button_image_1,
