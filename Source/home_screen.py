@@ -1,5 +1,6 @@
 from pathlib import Path
 from tkinter import *
+import mysql.connector
 
 def show_home_screen(db_conn, username, user_id):
 
@@ -100,17 +101,22 @@ def show_home_screen(db_conn, username, user_id):
     inventory_table.insert(END, header_format)
     inventory_table.insert(END, "-" * 43 + "\n")  # Line between header and ingredients
 
-    #starting ingredients
-    rows = [
-        ["Apples", "10/25/2024", "3"],
-        ["Lettuce", "10/27/2024", "3 cups"]
-    ]
+    cursor = db_conn.cursor()
+
+    # Execute a query
+    query = ("SELECT food_name, expiration_date, quantity FROM ingredients "
+             "WHERE user_id = %s")
+    value = (user_id,) # Needs to of type list, tuple, or dict, so we wrap the value in a tuple.
+    cursor.execute(query, value)
+
+    # Fetch the results
+    results = cursor.fetchall()
 
     def inserting_rows(product, expiration, quantity):
-        rows_format = "{:13} {:20} {:5}\n".format(product, expiration, quantity) # format rows to match headers
+        rows_format = "{:13} {:} {:5}\n".format(product, expiration, quantity) # format rows to match headers
         inventory_table.insert(END, rows_format)
 
-    for row in rows:    # loop through rows defined above
+    for row in results:    # loop through rows defined above
         inserting_rows(row[0], row[1], row[2])
 
 
