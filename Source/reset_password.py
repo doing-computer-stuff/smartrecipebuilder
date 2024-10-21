@@ -1,6 +1,7 @@
 from pathlib import Path
 from tkinter import *
 from tkinter import messagebox
+from utilities import *
 
 
 def show_reset_password(db_conn):
@@ -175,11 +176,14 @@ def show_reset_password(db_conn):
         confirm_password = confirm_new_password_input.get()
         if new_password == confirm_password:
 
+            # Hash the new password before updating the database.
+            hashed_password = hash_password(new_password)
+
             # Create a cursor to execute SQL commands.
             cursor = db_conn.cursor()
 
             # Execute query to update users password.
-            cursor.execute(f"UPDATE users SET user_password = '{new_password}' WHERE username = '{username}'")
+            cursor.execute(f"UPDATE users SET user_password = '{hashed_password}' WHERE username = '{username}'")
             
             # Commit changes to the database and close connection to cursor.
             db_conn.commit()
