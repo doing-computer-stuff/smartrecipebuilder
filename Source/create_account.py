@@ -157,15 +157,23 @@ def show_create_account(db_conn):
 
     # create account button and function
     def create_account():
-        # Getting it through the console?
-        if (username_input.get() != "") and (password_input.get() != "") and (password_input.get() == confirm_password_input.get()):
+
+        # Store the given username and password into a variable for ease of use.
+        temp_username = username_input.get()
+        temp_password = password_input.get()
+
+        if (temp_username != "") and (temp_password != "") and (temp_password == confirm_password_input.get()):
+
+            # Hash the password before storing into database.
+            hashed_password = hash_password(temp_password)
+
 
             # Create a cursor to execute SQL commands.
             cursor = db_conn.cursor()
 
             # Execute query to insert new user data into user database.
             cursor.execute("INSERT INTO users (username, user_password) VALUES (%s, %s)",
-                (username_input.get(), password_input.get()))
+                (temp_username, hashed_password))
 
             # Commit changes to the database and close connection to cursor.
             db_conn.commit()
