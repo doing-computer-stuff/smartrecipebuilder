@@ -4,6 +4,8 @@ from tkinter import messagebox
 import tkinter as tk
 #from PIL import Image
 import mysql.connector
+import hashlib
+from utilities import *
 
 def show_login_screen(db_conn):
 
