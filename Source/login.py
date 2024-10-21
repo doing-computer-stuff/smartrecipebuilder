@@ -128,24 +128,22 @@ def show_login_screen(db_conn):
     # Method to check whether the given username and password are in the database.
     # Returns true if there is at least one row with the given username AND password.
     def verify_login_credentials(username, password):
+
         # Create a cursor to execute SQL commands.
-        cursor = db_conn.cursor()
+        cursor = db_conn.cursor(dictionary = True)
 
         # Execute query to see whether user exists.
         cursor.execute(
-        "SELECT COUNT(*) FROM users WHERE username = %s AND user_password = %s",
-        (username, password))
+        "SELECT user_password FROM users WHERE username = %s",
+        (username,))
 
-        results = cursor.fetchall()
-        row_count = cursor.rowcount
+        # Under assumption usernames are unique!
+        db_password = cursor.fetchall()[0]["user_password"]
         
         # Commit changes to the database and close connection to cursor.
         cursor.close()
 
-        if row_count == 0:
-            return False
-        
-        return True
+        return compare_passwords(db_password, password)
 
     # Method to check whether the given username and password are in the database.
     def get_user_info(username):
