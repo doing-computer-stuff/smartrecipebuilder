@@ -1,7 +1,6 @@
 from pathlib import Path
 from tkinter import *
 from tkinter import messagebox
-import mysql.connector
 from utilities import *
 
 def show_create_account(db_conn):
@@ -128,7 +127,6 @@ def show_create_account(db_conn):
     )
 
     password_input = Entry(
-        show="*",
         bd=0,
         bg="#D9D9D9",
         fg="#000716",
@@ -142,7 +140,6 @@ def show_create_account(db_conn):
     )
 
     confirm_password_input = Entry(
-        show="*",
         bd=0,
         bg="#D9D9D9",
         fg="#000716",
@@ -158,22 +155,44 @@ def show_create_account(db_conn):
     # create account button and function
     def create_account():
 
-        # Store the given username and password into a variable for ease of use.
-        temp_username = username_input.get()
-        temp_password = password_input.get()
+        selected_username = username_input.get()
+        selected_password = password_input.get()
+        confirmed_password = confirm_password_input.get()
 
-        if (temp_username != "") and (temp_password != "") and (temp_password == confirm_password_input.get()):
+        if selected_username == "":
+            messagebox.showwarning("No Username Entered", "Please enter a username.")
+            return
+
+        if selected_password == "":
+            messagebox.showwarning("No Password Entered", "Please enter a password.")
+            return
+        elif selected_password != confirmed_password:
+            messagebox.showwarning("Error", "Passwords do not match.")
+            return
+
+        # prevent duplicate usernames
+        def is_available_username():
+            cursor = db_conn.cursor()
+            cursor.execute(f"SELECT COUNT(*) FROM users WHERE username = '{selected_username}';")
+            result = cursor.fetchone()
+            cursor.close()
+            if result[0] == 0:
+                return True
+            return False
+
+
+
+        if is_available_username():
 
             # Hash the password before storing into database.
-            hashed_password = hash_password(temp_password)
-
+            hashed_password = hash_password(selected_password)
 
             # Create a cursor to execute SQL commands.
             cursor = db_conn.cursor()
 
             # Execute query to insert new user data into user database.
             cursor.execute("INSERT INTO users (username, user_password) VALUES (%s, %s)",
-                (temp_username, hashed_password))
+                           (selected_username, hashed_password))
 
             # Commit changes to the database and close connection to cursor.
             db_conn.commit()
@@ -182,7 +201,7 @@ def show_create_account(db_conn):
             messagebox.showinfo("Success", "You have successfully created an account!")
             navigate_to_login_screen()
         else:
-            print("Create Account button clicked")
+            messagebox.showwarning("Username Unavailable", "Please select another username.")
 
     create_account_button = Button(
         image=button_image_1,

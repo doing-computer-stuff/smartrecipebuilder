@@ -3,8 +3,6 @@ from tkinter import *
 from tkinter import messagebox
 import tkinter as tk
 #from PIL import Image
-import mysql.connector
-import hashlib
 from utilities import *
 
 def show_login_screen(db_conn):
@@ -184,7 +182,6 @@ def show_login_screen(db_conn):
             cursor.close()
             return result
 
-        # Just placeholder code, the user_info passed to home_screen will be in associative array form already, returns that way from db query.
         username = username_input.get()
         password = password_input.get()
 

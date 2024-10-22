@@ -159,7 +159,7 @@ def show_input_ingredients_screen(db_conn, username, user_id):
         x=10.0,
         y=583.0,
         width=98.0,
-        height=30.749998092651367
+        height=30.75
     )
 
     def add_ingredient():
@@ -248,18 +248,18 @@ def show_input_ingredients_screen(db_conn, username, user_id):
         x=58.0,
         y=423.0,
         width=98.0,
-        height=30.749998092651367
+        height=30.75
     )
 
     def remove_ingredient():
 
-        selected_ingredient = ingredients_table.selection()
-        if len(selected_ingredient) == 0:
+        selected_ingredients = ingredients_table.selection()
+        if len(selected_ingredients) == 0:
             messagebox.showinfo("Selection Required", "Select an ingredient from the table to remove it.\nHold the CTRL key to select or unselect multiple ingredients.")
             return
         else:
             cursor = db_conn.cursor(dictionary=True)
-            for ingredient in selected_ingredient:
+            for ingredient in selected_ingredients:
                 column_values = ingredients_table.item(ingredient)
                 ingredient_name = column_values['values'][0]
                 expiration_date = column_values['values'][1]
@@ -282,7 +282,7 @@ def show_input_ingredients_screen(db_conn, username, user_id):
         x=58.0,
         y=477.0,
         width=98.0,
-        height=30.749998092651367
+        height=30.75
     )
 
     ingredient_name_input = Entry(
@@ -362,7 +362,8 @@ def show_input_ingredients_screen(db_conn, username, user_id):
     ingredients_table.column("Quantity", width="130", anchor="c", stretch=NO)
 
     cursor = db_conn.cursor(dictionary=True)
-    cursor.execute(f"SELECT food_name, DATE_FORMAT(expiration_date, '%m/%d/%Y') expiration_date, quantity FROM ingredients WHERE user_id = '{user_id}'")
+    query = f"SELECT food_name, DATE_FORMAT(expiration_date, '%m/%d/%Y') expiration_date, quantity FROM ingredients WHERE user_id = '{user_id}'"
+    cursor.execute(query)
     user_inventory = cursor.fetchall()
     cursor.close()
     iid = 0

@@ -1,4 +1,3 @@
-from pathlib import Path
 import tkinter as tk
 from tkinter import ttk
 
@@ -6,7 +5,7 @@ def show_expiration_help_window():
 
     # Create the window
     window = tk.Tk()
-    window.geometry("300x250")
+    window.geometry("330x250")
     window.configure(bg="#4EB276")
     window.title("Expiration Date Guidelines")
     window.resizable(False, False)
@@ -19,12 +18,14 @@ def show_expiration_help_window():
 
     # Create the Treeview
     table = ttk.Treeview(window, columns=("Column 1", "Column 2"), show="headings", style="Treeview")
+    vsb = ttk.Scrollbar(window, orient="vertical", command=table.yview)
+    vsb.pack(side='right', fill='y')
 
     # Define the headings
     table.heading("Column 1", text="Product")
-    table.column("Column 1", width="150", anchor="c")
+    table.column("Column 1", width="165", anchor="c")
     table.heading("Column 2", text="Shelf Life")
-    table.column("Column 2", width="150", anchor="c")
+    table.column("Column 2", width="165", anchor="c")
 
     # Insert some grocery data
     table.insert("", tk.END, values=("Tomatoes", "5-7 Days"))

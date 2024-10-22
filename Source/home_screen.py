@@ -95,24 +95,21 @@ def show_home_screen(db_conn, username, user_id):
         height=400.0
     )
 
+    inventory_table.config(wrap=NONE)
     headers = ["Product", "Expiration Date", "Quantity"]
-    header_format = "{:<13} {:<20} {:<5}\n".format(*headers)  # spacing between each header
+    header_format = "{:<13} {:<18} {:<7}\n".format(*headers)  # spacing between each header
     inventory_table.insert(END, header_format)
     inventory_table.insert(END, "-" * 43 + "\n")  # Line between header and ingredients
 
+    # query database to populate table
     cursor = db_conn.cursor()
-
-    # Execute a query
-    query = ("SELECT food_name, expiration_date, quantity FROM ingredients "
-             "WHERE user_id = %s")
-    value = (user_id,) # Needs to of type list, tuple, or dict, so we wrap the value in a tuple.
-    cursor.execute(query, value)
-
-    # Fetch the results
+    query = f"SELECT food_name, DATE_FORMAT(expiration_date, '%m/%d/%Y') expiration_date, quantity FROM ingredients WHERE user_id = '{user_id}';"
+    cursor.execute(query)
     results = cursor.fetchall()
+    cursor.close()
 
     def inserting_rows(product, expiration, quantity):
-        rows_format = "{:13} {:} {:15}\n".format(product, expiration, quantity) # format rows to match headers
+        rows_format = "{:13} {:18} {:}\n".format(product, expiration, quantity) # format rows to match headers
         inventory_table.insert(END, rows_format)
 
     for row in results:    # loop through rows defined above
