@@ -165,7 +165,7 @@ def show_input_ingredients_screen(db_conn, username, user_id):
     def add_ingredient():
 
         def no_blank_fields():
-            if (ingredient_name_input.get() and quantity_input.get() and units_input.get() and expiration_date_input.get()) != "":
+            if (ingredient_name_input.get() and quantity_input.get() and expiration_date_input.get()) != "":
                 return True
             return False
 
@@ -182,7 +182,7 @@ def show_input_ingredients_screen(db_conn, username, user_id):
             return False
 
         def quantity_with_units_length_is_valid():
-            if units_input.get() == "n/a":
+            if units_input.get() == "none":
                 quantity = quantity_input.get()
             else:
                 quantity = quantity_input.get() + " " + units_input.get()
@@ -217,7 +217,7 @@ def show_input_ingredients_screen(db_conn, username, user_id):
 
         if no_blank_fields() and ingredient_name_is_valid() and quantity_is_valid() and quantity_with_units_length_is_valid() and is_correct_date_format():
             ingredient_name = ingredient_name_input.get()
-            if units_input.get() == "n/a":
+            if units_input.get() == "none":
                 quantity = quantity_input.get()
             else:
                 quantity = quantity_input.get() + " " + units_input.get()
@@ -235,7 +235,6 @@ def show_input_ingredients_screen(db_conn, username, user_id):
             messagebox.showwarning("Invalid Units", "The quantity with units added is too long.")
         else:
             messagebox.showwarning("Invalid Date", "Please use date format 01/05/2020.")
-
 
     add_button = Button(
         image=button_image_2,
@@ -299,23 +298,28 @@ def show_input_ingredients_screen(db_conn, username, user_id):
         height=39.0
     )
 
-    # ingredient_units_entry = ttk.Combobox(window, width=10, values=("none", "cups", "ounces", "quarts", "gallon"))
-    # window.lift(ingredient_units_entry)
-    # ingredient_units_entry.pack(padx=15, pady=265)
+    style = ttk.Style(window)
+    style.configure("TCombobox", background="#D9D9D9", fieldbackground="#D9D9D9")
+    style.map("TCombobox", background=[("selected", "#284846")])
+    units_input = ttk.Combobox(window, state="readonly", width=13,
+                               values=("none", "bag", "bags", "box", "boxes", "can", "cans", "cup", "cups", "gallon",
+                                       "gallons", "ounce", "ounces", "package", "quart", "quarts"), style="TCombobox")
+    units_input.set("none")
+    units_input.place(anchor="nw", x=200, y=265)
 
-    units_input = Entry(
-        bd=0,
-        bg="#D9D9D9",
-        fg="#000716",
-        highlightthickness=0
-    )
-    units_input.insert(0, "n/a")
-    units_input.place(
-        x=198.0,
-        y=255.0,
-        width=100.0,
-        height=39.0
-    )
+    # units_input = Entry(
+    #     bd=0,
+    #     bg="#D9D9D9",
+    #     fg="#000716",
+    #     highlightthickness=0
+    # )
+    # units_input.insert(0, "n/a")
+    # units_input.place(
+    #     x=198.0,
+    #     y=255.0,
+    #     width=100.0,
+    #     height=39.0
+    # )
 
 
     expiration_date_input = Entry(
@@ -348,7 +352,6 @@ def show_input_ingredients_screen(db_conn, username, user_id):
 
     # initial table setup
 
-    style = ttk.Style(window)
     style.theme_use("clam")
     style.configure("Treeview", background="#D9D9D9", fieldbackground="#D9D9D9", borderdwidth=0, relief="flat")
     style.map('Treeview', background=[('selected', '#284846')])
