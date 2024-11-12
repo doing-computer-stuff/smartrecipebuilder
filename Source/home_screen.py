@@ -1,5 +1,6 @@
 from pathlib import Path
 from tkinter import *
+from datetime import *
 
 def show_home_screen(db_conn, username, user_id):
 
@@ -95,27 +96,26 @@ def show_home_screen(db_conn, username, user_id):
         height=400.0
     )
 
+    # Define table
     inventory_table.config(wrap=NONE)
     headers = ["Product", "Expiration Date", "Quantity"]
-    header_format = "{:<13} {:<18} {:<7}\n".format(*headers)  # spacing between each header
+    header_format = "{:<13} {:<18} {:<7}\n".format(*headers)  # Spacing between each header.
     inventory_table.insert(END, header_format)
-    inventory_table.insert(END, "-" * 43 + "\n")  # Line between header and ingredients
+    inventory_table.insert(END, "-" * 43 + "\n")  # Line between header and ingredients.
 
-    # query database to populate table
+    # Query database to populate table.
     cursor = db_conn.cursor()
-    query = f"SELECT food_name, DATE_FORMAT(expiration_date, '%m/%d/%Y') expiration_date, quantity FROM ingredients WHERE user_id = '{user_id}';"
-    cursor.execute(query)
+    cursor.execute("SELECT food_name, expiration_date, quantity FROM ingredients WHERE user_id = ?", (user_id,))
     results = cursor.fetchall()
     cursor.close()
 
     def inserting_rows(product, expiration, quantity):
-        rows_format = "{:13} {:18} {:}\n".format(product, expiration, quantity) # format rows to match headers
+        # Format date using sqlite friendly tools.
+        rows_format = "{:13} {:18} {:}\n".format(product, datetime.strptime(expiration, "%Y-%m-%d").strftime("%m/%d/%Y"), quantity) # format rows to match headers
         inventory_table.insert(END, rows_format)
 
-    for row in results:    # loop through rows defined above
+    for row in results:    # Loop through rows defined above.
         inserting_rows(row[0], row[1], row[2])
-
-
 
     def navigate_to_login_screen():
         from login import show_login_screen
