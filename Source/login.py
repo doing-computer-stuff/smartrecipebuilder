@@ -13,7 +13,7 @@ def show_login_screen(db_conn):
     def relative_to_assets(path: str) -> Path:
         return ASSETS_PATH / Path(path)
 
-    # create window and canvas, and center on screen
+    # Create window and canvas and center on screen.
     window = Tk()
     # screen_width = window.winfo_width()
     # screen_height = window.winfo_height()
@@ -38,7 +38,7 @@ def show_login_screen(db_conn):
     )
     canvas.place(x = 0, y = 0)
 
-    # place images
+    # Place images
     image_image_2 = PhotoImage(
         file=relative_to_assets("image_2.png"))
     image_2 = canvas.create_image(
@@ -63,7 +63,7 @@ def show_login_screen(db_conn):
     button_image_1 = PhotoImage(
         file=relative_to_assets("button_1.png"))
 
-    # place text
+    # Place text
     canvas.create_text(
         189.0,
         45.0,
@@ -97,7 +97,7 @@ def show_login_screen(db_conn):
         font=("Inter Bold", 14 * -1)
     )
 
-    # place entry fields
+    # Place entry fields
     username_input = Entry(
         bd=0,
         bg="#D9D9D9",
@@ -126,7 +126,7 @@ def show_login_screen(db_conn):
     )
 
 
-    # links and functions for create account and reset password
+    # Links and functions for create account and reset password.
     def navigate_to_create_account():
         from create_account import show_create_account
         window.destroy()
@@ -153,7 +153,7 @@ def show_login_screen(db_conn):
         def valid_username(username):
             # Verify that the username exists in the db.
             cursor = db_conn.cursor()
-            cursor.execute(f"SELECT COUNT(*) FROM users WHERE username = '{username}';")
+            cursor.execute("SELECT COUNT(*) FROM users WHERE username = ?", (username,))
             result = cursor.fetchone()
             cursor.close()
             if result[0] == 0:
@@ -163,22 +163,23 @@ def show_login_screen(db_conn):
         # Method to check whether the given username and password are in the database.
         # Returns true if there is at least one row with the given username AND password.
         def verify_login_credentials(username, password):
-            cursor = db_conn.cursor(dictionary = True)
+            cursor = db_conn.cursor()
             # Execute query to see whether user exists.
             cursor.execute(
-            "SELECT user_password FROM users WHERE username = %s",
+            "SELECT user_password FROM users WHERE username = ?",
             (username,))
             # Under assumption usernames are unique!
-            db_password = cursor.fetchall()[0]["user_password"]
+            db_password = cursor.fetchall()[0][0]
             cursor.close()
             return compare_passwords(db_password, password)
 
-            # Method to check whether the given username and password are in the database.
+        # Method to check whether the given username and password are in the database.
         def get_user_info(username):
-            cursor = db_conn.cursor(dictionary=True)
+            cursor = db_conn.cursor()
             # Execute query to see whether user exists.
-            cursor.execute(f"SELECT username, user_id FROM users WHERE username = '{username}'")
+            cursor.execute("SELECT username, user_id FROM users WHERE username = ?", (username,))
             result = cursor.fetchone()
+            print(result)
             cursor.close()
             return result
 
@@ -190,7 +191,7 @@ def show_login_screen(db_conn):
                 user_info = get_user_info(username)
                 window.destroy()
                 # Pass the database connection and user ID here.
-                show_home_screen(db_conn, user_info['username'], user_info['user_id'])
+                show_home_screen(db_conn, user_info[0], user_info[1])
             else:
                 messagebox.showwarning("Invalid Credentials", "Incorrect Password.")
                 return
@@ -213,7 +214,7 @@ def show_login_screen(db_conn):
         height=41.0
     )
 
-    # button hover effects
+    # Button hover effects
     button_image_hover_1 = PhotoImage(
         file=relative_to_assets("button_hover_1.png"))
 
@@ -229,7 +230,7 @@ def show_login_screen(db_conn):
     login_button.bind('<Enter>', button_1_hover)
     login_button.bind('<Leave>', button_1_leave)
 
-    ### disable this before trying to enable gif
+    ### Disable this before trying to enable gif.
     image_image_1 = PhotoImage(
         file=relative_to_assets("image_1.png"))
     image_1 = canvas.create_image(
