@@ -152,7 +152,7 @@ def show_create_account(db_conn):
         height=39.0
     )
 
-    # create account button and function
+    # Create account button and function.
     def create_account():
 
         selected_username = username_input.get()
@@ -162,7 +162,6 @@ def show_create_account(db_conn):
         if selected_username == "":
             messagebox.showwarning("No Username Entered", "Please enter a username.")
             return
-
         if selected_password == "":
             messagebox.showwarning("No Password Entered", "Please enter a password.")
             return
@@ -170,10 +169,10 @@ def show_create_account(db_conn):
             messagebox.showwarning("Error", "Passwords do not match.")
             return
 
-        # prevent duplicate usernames
+        # Prevent duplicate usernames
         def is_available_username():
             cursor = db_conn.cursor()
-            cursor.execute(f"SELECT COUNT(*) FROM users WHERE username = '{selected_username}';")
+            cursor.execute("SELECT COUNT(*) FROM users WHERE username = ?", (selected_username,))
             result = cursor.fetchone()
             cursor.close()
             if result[0] == 0:
@@ -191,8 +190,7 @@ def show_create_account(db_conn):
             cursor = db_conn.cursor()
 
             # Execute query to insert new user data into user database.
-            cursor.execute("INSERT INTO users (username, user_password) VALUES (%s, %s)",
-                           (selected_username, hashed_password))
+            cursor.execute("INSERT INTO users (username, user_password) VALUES (?, ?)", (selected_username, hashed_password))
 
             # Commit changes to the database and close connection to cursor.
             db_conn.commit()
@@ -217,7 +215,7 @@ def show_create_account(db_conn):
         height=41.0
     )
 
-    # back button function
+    # Back button function
     def navigate_to_login_screen():
         from login import show_login_screen
         window.destroy()
@@ -237,7 +235,7 @@ def show_create_account(db_conn):
         height=27.666675567626953
     )
 
-    # button hover effects
+    # Button hover effects
     button_image_hover_2 = PhotoImage(
         file=relative_to_assets("button_hover_1.png"))
 
