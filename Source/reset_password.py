@@ -3,7 +3,6 @@ from tkinter import *
 from tkinter import messagebox
 from utilities import *
 
-
 def show_reset_password(db_conn):
 
     OUTPUT_PATH = Path(__file__).parent
@@ -146,13 +145,13 @@ def show_reset_password(db_conn):
 
     # Method to reset the password of the user.
     def password_reset():
+
         # If the provided passwords match, connect to the user database
         # and update the password of the user.
-
         def valid_username(username):
             # Verify that the username exists in the db
             cursor = db_conn.cursor()
-            cursor.execute(f"SELECT COUNT(*) FROM users WHERE username = '{username}';")
+            cursor.execute("SELECT COUNT(*) FROM users WHERE username = ?", (username,))
             result = cursor.fetchone()
             cursor.close()
             if result[0] == 0:
@@ -183,7 +182,7 @@ def show_reset_password(db_conn):
             cursor = db_conn.cursor()
 
             # Execute query to update users password.
-            cursor.execute(f"UPDATE users SET user_password = '{hashed_password}' WHERE username = '{username}'")
+            cursor.execute("UPDATE users SET user_password = ? WHERE username = ?", (hashed_password, username))
             
             # Commit changes to the database and close connection to cursor.
             db_conn.commit()
