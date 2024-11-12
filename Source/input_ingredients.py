@@ -4,7 +4,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 import re
-import datetime
+from datetime import *
 
 def show_input_ingredients_screen(db_conn, username, user_id):
 
@@ -165,7 +165,7 @@ def show_input_ingredients_screen(db_conn, username, user_id):
     def add_ingredient():
 
         def no_blank_fields():
-            if (ingredient_name_input.get() and quantity_input.get() and expiration_date_input.get()) != "":
+            if (ingredient_name_input.get() and quantity_input.get() and units_input.get() and expiration_date_input.get()) != "":
                 return True
             return False
 
@@ -182,7 +182,7 @@ def show_input_ingredients_screen(db_conn, username, user_id):
             return False
 
         def quantity_with_units_length_is_valid():
-            if units_input.get() == "none":
+            if units_input.get() == "n/a":
                 quantity = quantity_input.get()
             else:
                 quantity = quantity_input.get() + " " + units_input.get()
@@ -198,32 +198,33 @@ def show_input_ingredients_screen(db_conn, username, user_id):
             return False
 
         def insert_into_database(ingredient_name, expiration_date, quantity, user_id):
-            cursor = db_conn.cursor(dictionary=True)
-            query = f"INSERT INTO ingredients (food_name, expiration_date, quantity, user_id) VALUES ('{ingredient_name}', '{expiration_date}', '{quantity}', '{user_id}');"
-            cursor.execute(query)
+            cursor = db_conn.cursor()
+            cursor.execute("INSERT INTO ingredients (food_name, expiration_date, quantity, user_id) VALUES (?, ?, ?, ?)", (ingredient_name, expiration_date, quantity, user_id))
             db_conn.commit()
-            #update table view after adding ingredient
-            query = f"SELECT food_name, DATE_FORMAT(expiration_date, '%m/%d/%Y') expiration_date, quantity FROM ingredients WHERE user_id = '{user_id}';"
-            cursor.execute(query)
+            
+            # Update table view after adding ingredient.
+            cursor.execute("SELECT food_name, expiration_date, quantity FROM ingredients WHERE user_id = ?", (user_id,))
             user_inventory = cursor.fetchall()
             for row in ingredients_table.get_children():
                 ingredients_table.delete(row)
             iid = 0
             for item in user_inventory:
-                ingredients_table.insert(parent="", index="end", iid=iid,values=(item['food_name'], item['expiration_date'], item['quantity']))
+                # Format date using sqlite friendly tools.
+                ingredients_table.insert(parent="", index="end", iid=iid,values=(item[0], datetime.strptime(item[1], "%Y-%m-%d").strftime("%m/%d/%Y"), item[2]))
                 iid += 1
             db_conn.commit()
             cursor.close()
 
         if no_blank_fields() and ingredient_name_is_valid() and quantity_is_valid() and quantity_with_units_length_is_valid() and is_correct_date_format():
             ingredient_name = ingredient_name_input.get()
-            if units_input.get() == "none":
+            if units_input.get() == "n/a":
                 quantity = quantity_input.get()
             else:
                 quantity = quantity_input.get() + " " + units_input.get()
             expiration_date = expiration_date_input.get()
-            expiration_date = datetime.datetime.strptime(expiration_date, "%m/%d/%Y")
-            db_expiration_date = datetime.date.strftime(expiration_date, "%Y-%m-%d")
+            expiration_date = datetime.strptime(expiration_date, "%m/%d/%Y")
+            # Format date into database format.
+            db_expiration_date = datetime.strftime(expiration_date, "%Y-%m-%d")
             insert_into_database(ingredient_name, db_expiration_date, quantity, user_id)
         elif not no_blank_fields():
             messagebox.showwarning("Empty Input Fields", "Please enter all required information.")
@@ -253,19 +254,22 @@ def show_input_ingredients_screen(db_conn, username, user_id):
     def remove_ingredient():
 
         selected_ingredients = ingredients_table.selection()
+        print("Selected Ingredients: ")
+        print(selected_ingredients)
         if len(selected_ingredients) == 0:
             messagebox.showinfo("Selection Required", "Select an ingredient from the table to remove it.\nHold the CTRL key to select or unselect multiple ingredients.")
             return
+
         else:
-            cursor = db_conn.cursor(dictionary=True)
+            cursor = db_conn.cursor()
             for ingredient in selected_ingredients:
                 column_values = ingredients_table.item(ingredient)
                 ingredient_name = column_values['values'][0]
                 expiration_date = column_values['values'][1]
-                expiration_date = datetime.datetime.strptime(expiration_date, "%m/%d/%Y")
-                db_expiration_date = datetime.date.strftime(expiration_date, "%Y-%m-%d")
-                query = f"DELETE FROM ingredients WHERE food_name = '{ingredient_name}' and expiration_date = '{db_expiration_date}' and user_id = '{user_id}';"
-                cursor.execute(query)
+                expiration_date = datetime.strptime(expiration_date, "%m/%d/%Y")
+                # Format date into database format.
+                db_expiration_date = datetime.strftime(expiration_date, "%Y-%m-%d")
+                cursor.execute("DELETE FROM ingredients WHERE food_name = ? and expiration_date = ? and user_id = ?", (ingredient_name, db_expiration_date, user_id))
                 db_conn.commit()
                 ingredients_table.delete(ingredient)
             cursor.close()
@@ -298,28 +302,23 @@ def show_input_ingredients_screen(db_conn, username, user_id):
         height=39.0
     )
 
-    style = ttk.Style(window)
-    style.configure("TCombobox", background="#D9D9D9", fieldbackground="#D9D9D9")
-    style.map("TCombobox", background=[("selected", "#284846")])
-    units_input = ttk.Combobox(window, state="readonly", width=13,
-                               values=("none", "bag", "bags", "box", "boxes", "can", "cans", "cup", "cups", "gallon",
-                                       "gallons", "ounce", "ounces", "package", "quart", "quarts"), style="TCombobox")
-    units_input.set("none")
-    units_input.place(anchor="nw", x=200, y=265)
+    # ingredient_units_entry = ttk.Combobox(window, width=10, values=("none", "cups", "ounces", "quarts", "gallon"))
+    # window.lift(ingredient_units_entry)
+    # ingredient_units_entry.pack(padx=15, pady=265)
 
-    # units_input = Entry(
-    #     bd=0,
-    #     bg="#D9D9D9",
-    #     fg="#000716",
-    #     highlightthickness=0
-    # )
-    # units_input.insert(0, "n/a")
-    # units_input.place(
-    #     x=198.0,
-    #     y=255.0,
-    #     width=100.0,
-    #     height=39.0
-    # )
+    units_input = Entry(
+        bd=0,
+        bg="#D9D9D9",
+        fg="#000716",
+        highlightthickness=0
+    )
+    units_input.insert(0, "n/a")
+    units_input.place(
+        x=198.0,
+        y=255.0,
+        width=100.0,
+        height=39.0
+    )
 
 
     expiration_date_input = Entry(
@@ -352,6 +351,7 @@ def show_input_ingredients_screen(db_conn, username, user_id):
 
     # initial table setup
 
+    style = ttk.Style(window)
     style.theme_use("clam")
     style.configure("Treeview", background="#D9D9D9", fieldbackground="#D9D9D9", borderdwidth=0, relief="flat")
     style.map('Treeview', background=[('selected', '#284846')])
@@ -364,14 +364,14 @@ def show_input_ingredients_screen(db_conn, username, user_id):
     ingredients_table.heading("Quantity", text="Quantity")
     ingredients_table.column("Quantity", width="130", anchor="c", stretch=NO)
 
-    cursor = db_conn.cursor(dictionary=True)
-    query = f"SELECT food_name, DATE_FORMAT(expiration_date, '%m/%d/%Y') expiration_date, quantity FROM ingredients WHERE user_id = '{user_id}'"
-    cursor.execute(query)
+    cursor = db_conn.cursor()
+    cursor.execute("SELECT food_name, expiration_date, quantity FROM ingredients WHERE user_id = ?", (user_id,))
     user_inventory = cursor.fetchall()
     cursor.close()
     iid = 0
     for item in user_inventory:
-        ingredients_table.insert(parent="", index="end", iid=iid, values=(item['food_name'], item['expiration_date'], item['quantity']))
+        # Format date using sqlite friendly tools.
+        ingredients_table.insert(parent="", index="end", iid=iid, values=(item[0], datetime.strptime(item[1], "%Y-%m-%d").strftime("%m/%d/%Y"), item[2]))
         iid += 1
 
     ingredients_table.place(x=340, y=179, width=390, height=378)
