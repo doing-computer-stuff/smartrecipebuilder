@@ -1,8 +1,5 @@
-import mysql.connector
 from login import show_login_screen
 from utilities import *
-import sqlite3
-import os
 
 if __name__ == "__main__":
     # Path is in the same location as the program.

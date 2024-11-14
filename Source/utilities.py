@@ -1,7 +1,3 @@
-from pathlib import Path
-from tkinter import *
-from tkinter import messagebox
-import mysql.connector
 import hashlib
 import sqlite3
 import os
@@ -35,19 +31,33 @@ def create_database_if_not_exists(db_path):
                     user_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     account_creation_date text DEFAULT NULL,
                     username varchar(50) DEFAULT NULL,
-                    user_password varchar(64) DEFAULT NULL
+                    user_password varchar(64) DEFAULT NULL,
+                    saved_recipes text DEFAULT NULL
                 )
             ''')
 
             # Create ingredients table.
             cursor.execute('''
                 CREATE TABLE ingredients (
+                    food_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     food_name varchar(50) DEFAULT NULL,
                     expiration_date text DEFAULT NULL,
                     quantity varchar(15) DEFAULT NULL,
                     user_id INTEGER DEFAULT NULL,
-                    food_id INTEGER PRIMARY KEY NOT NULL,
                     FOREIGN KEY (user_id) REFERENCES users(user_id)
+                )
+            ''')
+
+            # Create recipes table.
+            cursor.execute('''
+                CREATE TABLE recipes (
+                    recipe_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    recipe_name text DEFAULT NULL,
+                    recipe_type text DEFAULT NULL,
+                    recipe_ingredients text DEFAULT NULL,
+                    recipe_cooking_method text DEFAULT NULL,
+                    recipe_cook_time text DEFAULT NULL,
+                    recipe_is_shareable text DEFAULT NULL
                 )
             ''')
             

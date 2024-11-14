@@ -2,7 +2,7 @@ from pathlib import Path
 from tkinter import *
 from tkinter import ttk, messagebox
 
-#def show_saved_recipe(db_conn, username, user_id):
+#def show_add_recipe_screen(db_conn, username, user_id):
 
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH / Path(r"assets/add_recipe")

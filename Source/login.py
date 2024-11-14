@@ -179,7 +179,6 @@ def show_login_screen(db_conn):
             # Execute query to see whether user exists.
             cursor.execute("SELECT username, user_id FROM users WHERE username = ?", (username,))
             result = cursor.fetchone()
-            print(result)
             cursor.close()
             return result
 
