@@ -13,7 +13,7 @@ def show_home_screen(db_conn, username, user_id):
 
     window = Tk()
 
-    window.geometry("784x759")
+    window.geometry("784x759+500+80")
     window.configure(bg = "#4EB276")
     window.title("Home")
     window.resizable(False, False)

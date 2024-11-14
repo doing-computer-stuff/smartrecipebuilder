@@ -12,7 +12,7 @@ def relative_to_assets(path: str) -> Path:
 
 window = Tk()
 
-window.geometry("703x986")
+window.geometry("703x986+500+15")
 window.configure(bg = "#4EB276")
 window.title("Add a Recipe")
 window.resizable(False, False)

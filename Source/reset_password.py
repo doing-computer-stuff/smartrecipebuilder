@@ -13,7 +13,7 @@ def show_reset_password(db_conn):
 
     window = Tk()
 
-    window.geometry("700x487")
+    window.geometry("700x487+500+80")
     window.configure(bg = "#4EB276")
     window.title("Reset Password")
     window.resizable(False, False)

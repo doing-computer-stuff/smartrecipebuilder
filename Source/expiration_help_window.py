@@ -5,7 +5,7 @@ def show_expiration_help_window():
 
     # Create the window
     window = tk.Tk()
-    window.geometry("330x250")
+    window.geometry("330x250+150+220")
     window.configure(bg="#4EB276")
     window.title("Expiration Date Guidelines")
     window.resizable(False, False)

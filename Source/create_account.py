@@ -13,7 +13,7 @@ def show_create_account(db_conn):
 
     window = Tk()
 
-    window.geometry("700x484")
+    window.geometry("700x484+500+80")
     window.configure(bg = "#4EB276")
     window.title("Create Account")
     window.resizable(False, False)

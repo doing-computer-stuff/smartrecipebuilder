@@ -15,14 +15,7 @@ def show_login_screen(db_conn):
 
     # Create window and canvas and center on screen.
     window = Tk()
-    # screen_width = window.winfo_width()
-    # screen_height = window.winfo_height()
-    # app_width = 700
-    # app_height = 436
-    # x = (screen_width / 2) - (app_width / 2)
-    # y = (screen_height / 2) - (app_height / 2)
-    # window.geometry(f"{app_width}x{app_height}+{int(x)}+{int(y)}")
-    window.geometry("700x436")
+    window.geometry("700x436+500+80")
     window.configure(bg="#4EB276")
     window.title("Login")
     window.resizable(False, False)

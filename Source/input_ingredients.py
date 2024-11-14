@@ -16,7 +16,7 @@ def show_input_ingredients_screen(db_conn, username, user_id):
 
     window = Tk()
 
-    window.geometry("784x623")
+    window.geometry("784x623+500+80")
     window.configure(bg = "#4EB276")
     window.title("My Ingredients")
     window.resizable(False, False)

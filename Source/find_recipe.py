@@ -3,7 +3,7 @@ from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
 
-#def show_find_recipe(db_conn, username, user_id):
+#def show_find_recipe_screen(db_conn, username, user_id):
 
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH / Path(r"assets/find_recipe")
@@ -13,7 +13,7 @@ def relative_to_assets(path: str) -> Path:
 
 window = Tk()
 
-window.geometry("859x920")
+window.geometry("859x920+500+50")
 window.configure(bg = "#4EB276")
 window.title("Find a Recipe")
 window.resizable(False, False)

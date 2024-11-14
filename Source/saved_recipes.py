@@ -3,7 +3,7 @@ from tkinter import *
 import tkinter as tk
 from tkinter import ttk, messagebox
 
-#def show_saved_recipes(db_conn, username, user_id):
+#def show_saved_recipes_screen(db_conn, username, user_id):
 
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH / Path(r"assets/saved_recipes")
@@ -15,7 +15,7 @@ def relative_to_assets(path: str) -> Path:
 
 window = Tk()
 
-window.geometry("859x873")
+window.geometry("859x873+500+80")
 window.configure(bg = "#4EB276")
 window.title("My Recipes")
 window.resizable(False, False)
