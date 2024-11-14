@@ -6,6 +6,5 @@ if __name__ == "__main__":
     db_path = "smartrecipebuilder.db"
     # Connect to database if it exists. If it does not, create it.
     db_conn = create_database_if_not_exists(db_path)
-    # print("Current working directory:", os.getcwd())
     show_login_screen(db_conn)
     db_conn.close()

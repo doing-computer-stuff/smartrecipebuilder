@@ -1,5 +1,6 @@
 from pathlib import Path
 from tkinter import *
+from tkinter import ttk
 from datetime import *
 
 def show_home_screen(db_conn, username, user_id):
@@ -83,39 +84,31 @@ def show_home_screen(db_conn, username, user_id):
         font=("Inter Bold", 20 * -1)
     )
 
-    inventory_table = Text(
-        bd=0,           #boarder width
-        bg="#D9D9D9",   #background
-        fg="#000716",   #foreground
-        highlightthickness=0
-    )
-    inventory_table.place(
-        x=70.0,
-        y=200.0,
-        width=350.0,
-        height=400.0
-    )
+    # table setup
+    style = ttk.Style(window)
+    style.theme_use("clam")
+    style.configure("Treeview", background="#D9D9D9", fieldbackground="#D9D9D9", borderdwidth=0, relief="flat")
+    style.map('Treeview', background=[('selected', '#284846')])
+    ingredients_table = ttk.Treeview(window, columns=("Product", "Expiration Date", "Quantity"), show="headings", style="Treeview")
 
-    # Define table
-    inventory_table.config(wrap=NONE)
-    headers = ["Product", "Expiration Date", "Quantity"]
-    header_format = "{:<13} {:<18} {:<7}\n".format(*headers)  # Spacing between each header.
-    inventory_table.insert(END, header_format)
-    inventory_table.insert(END, "-" * 43 + "\n")  # Line between header and ingredients.
+    ingredients_table.heading("Product", text="Product")
+    ingredients_table.column("Product", width="150", anchor="c", stretch=NO)
+    ingredients_table.heading("Expiration Date", text="Expiration Date")
+    ingredients_table.column("Expiration Date", width="115", anchor="c", stretch=NO)
+    ingredients_table.heading("Quantity", text="Quantity")
+    ingredients_table.column("Quantity", width="80", anchor="c", stretch=NO)
 
-    # Query database to populate table.
     cursor = db_conn.cursor()
     cursor.execute("SELECT food_name, expiration_date, quantity FROM ingredients WHERE user_id = ?", (user_id,))
-    results = cursor.fetchall()
+    user_inventory = cursor.fetchall()
     cursor.close()
+    user_inventory_sorted_by_date = sorted(user_inventory, key=lambda x: datetime.strptime(x[1], "%m/%d/%Y"))
+    iid = 0
+    for item in user_inventory_sorted_by_date:
+        ingredients_table.insert(parent="", index="end", iid=iid, values=(item[0], item[1], item[2]))
+        iid += 1
 
-    def inserting_rows(product, expiration, quantity):
-        # Format date using sqlite friendly tools.
-        rows_format = "{:13} {:18} {:}\n".format(product, datetime.strptime(expiration, "%Y-%m-%d").strftime("%m/%d/%Y"), quantity) # format rows to match headers
-        inventory_table.insert(END, rows_format)
-
-    for row in results:    # Loop through rows defined above.
-        inserting_rows(row[0], row[1], row[2])
+    ingredients_table.place(x=75, y=200, width=348, height=400)
 
     def navigate_to_login_screen():
         from login import show_login_screen
