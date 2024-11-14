@@ -40,7 +40,7 @@ def create_database_if_not_exists(db_path):
             cursor.execute('''
                 CREATE TABLE ingredients (
                     food_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    food_name varchar(50) DEFAULT NULL,
+                    food_name text COLLATE NOCASE DEFAULT NULL,
                     expiration_date text DEFAULT NULL,
                     quantity varchar(15) DEFAULT NULL,
                     user_id INTEGER DEFAULT NULL,
@@ -52,9 +52,9 @@ def create_database_if_not_exists(db_path):
             cursor.execute('''
                 CREATE TABLE recipes (
                     recipe_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    recipe_name text DEFAULT NULL,
+                    recipe_name text COLLATE NOCASE DEFAULT NULL ,
                     recipe_type text DEFAULT NULL,
-                    recipe_ingredients text DEFAULT NULL,
+                    recipe_ingredients text COLLATE NOCASE DEFAULT NULL,
                     recipe_cooking_method text DEFAULT NULL,
                     recipe_cook_time text DEFAULT NULL,
                     recipe_is_shareable text DEFAULT NULL
