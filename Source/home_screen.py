@@ -92,9 +92,9 @@ def show_home_screen(db_conn, username, user_id):
     ingredients_table = ttk.Treeview(window, columns=("Product", "Expiration Date", "Quantity"), show="headings", style="Treeview")
 
     ingredients_table.heading("Product", text="Product")
-    ingredients_table.column("Product", width="150", anchor="c", stretch=NO)
+    ingredients_table.column("Product", width="165", anchor="c", stretch=NO)
     ingredients_table.heading("Expiration Date", text="Expiration Date")
-    ingredients_table.column("Expiration Date", width="115", anchor="c", stretch=NO)
+    ingredients_table.column("Expiration Date", width="100", anchor="c", stretch=NO)
     ingredients_table.heading("Quantity", text="Quantity")
     ingredients_table.column("Quantity", width="80", anchor="c", stretch=NO)
 
@@ -131,6 +131,9 @@ def show_home_screen(db_conn, username, user_id):
 
     def navigate_to_find_new_recipes_screen():
         print("Find New Recipe button clicked")
+        # from find_recipe import show_find_recipe_screen
+        # window.destroy()
+        # show_find_recipe_screen(db_conn, username, user_id)
 
     find_new_recipe_button = Button(
         image=button_image_2,
@@ -147,7 +150,9 @@ def show_home_screen(db_conn, username, user_id):
     )
 
     def navigate_to_saved_recipes_screen():
-        print("My Saved Recipes button clicked")
+        from saved_recipes import show_saved_recipes_screen
+        window.destroy()
+        show_saved_recipes_screen(db_conn, username, user_id)
 
     saved_recipes_button = Button(
         image=button_image_5,
@@ -164,7 +169,9 @@ def show_home_screen(db_conn, username, user_id):
     )
 
     def navigate_to_add_recipe_screen():
-        print("Add a Recipe button clicked")
+        from add_recipe import show_add_recipe_screen
+        window.destroy()
+        show_add_recipe_screen(db_conn, username, user_id)
 
     add_recipe_button = Button(
         image=button_image_4,
