@@ -2,7 +2,6 @@ from pathlib import Path
 from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
-import sqlite3
 from utilities import *
 import re
 
@@ -323,49 +322,61 @@ def show_find_recipe_screen(db_conn, username, user_id):
     )
 
     # use to cycle through found recipes
-    show_recipe_button_num_clicks = 0
+    global show_a_recipe_button_num_clicks
+    show_a_recipe_button_num_clicks = 0
 
     # fetch all recipes from the database that match the users ingredients and cycle through with button click
     generate_recipe_button_clicks = 0
     filtered_recipes_for_user = []
     def generate_a_recipe():
+
         # If the user only wants recipes where they have all the ingredients.
         # Get user ingredients and convert them into a set
-        nonlocal generate_recipe_button_clicks
-        nonlocal filtered_recipes_for_user
+        def show_a_recipe_button_click(matching_recipes):
+            if len(matching_recipes) <= 0:
+                messagebox.showwarning("Empty Search Results", "No recipes found that match those filters.")
+                return
+            else:
+                global show_a_recipe_button_num_clicks
+                recipe_name_field.delete(0, 'end')
+                recipe_name_field.insert(0, matching_recipes[show_a_recipe_button_num_clicks][1])
+                recipe_ingredients_field.delete(1.0, 'end')
+                recipe_ingredients_field.insert(END, matching_recipes[show_a_recipe_button_num_clicks][3])
+                recipe_cooking_method_field.delete(1.0, 'end')
+                recipe_cooking_method_field.insert(END, matching_recipes[show_a_recipe_button_num_clicks][4])
+                show_a_recipe_button_num_clicks += 1
+                if show_a_recipe_button_num_clicks == len(matching_recipes):
+                    show_a_recipe_button_num_clicks = 0
 
-        # If they have already looked at all the previously searched recipes,
-        # preform another search in case anything changed.
-        if len(filtered_recipes_for_user) <= generate_recipe_button_clicks:
-            filtered_recipes_for_user = []
-            generate_recipe_button_clicks = 0
-            query = "SELECT recipe_name, recipe_type, recipe_ingredients FROM recipes"
-            cursor = db_conn.cursor()
-            cursor.execute(query)
-            all_recipes = cursor.fetchall()
-            cursor.close()
-            user_ingredients_set = get_user_ingredients_names(db_conn, user_id)
-            # Loop through potential recipes.
-            for recipe in all_recipes:
-                # Get recipe ingredients as a set.
-                recipe_ingredients_set = set(recipe[2].split("\t"))
-                # Check if the current recipes ingredients is a subset of the users ingredients.
-                if recipe_ingredients_set.issubset(user_ingredients_set):
-                    # Add them to the filtered list for future use.
-                    filtered_recipes_for_user.append(recipe)
-
-        if len(filtered_recipes_for_user) <= 0:
-            messagebox.showwarning("No Search Results", "No recipes found that match those filters.")
-            return
-
-        generate_recipe_button_clicks += 1
-        current_recipe = filtered_recipes_for_user[generate_recipe_button_clicks - 1]
-        recipe_name_field.delete(0,'end')
-        recipe_ingredients_field.delete(1.0, 'end')
-        recipe_cooking_method_field.delete(1.0, 'end')
-        recipe_name_field.insert(0, current_recipe[0])
-        recipe_ingredients_field.insert(END, current_recipe[1])
-        recipe_cooking_method_field.insert(END, current_recipe[2])
+        cursor = db_conn.cursor()
+        cursor.execute("SELECT * FROM recipes")
+        all_recipes = cursor.fetchall()
+        fetched_user_ingredients = get_user_ingredients_names(db_conn, user_id)
+        matching_recipes = []
+        # Grab a recipe from the query.
+        for recipe in all_recipes:
+            recipe_ingredients = recipe[3].split(
+                "\n")  # the 4th field is the recipe ingredients list split field into array
+            ingredient_was_found_in_line = []
+            # Grab an ingredient line from the current recipe (EX: 1/2 Cup Tomatoes Diced)
+            for line in recipe_ingredients:
+                found_ingredient = False
+                # Grab a single ingredient from the users ingredients.
+                for ingredient in fetched_user_ingredients:
+                    in_line = re.search(ingredient, line, flags=re.IGNORECASE)
+                    if in_line is not None:
+                        found_ingredient = True
+                        break
+                if found_ingredient is False:
+                    ingredient_was_found_in_line.append(False)
+                    break
+                else:
+                    ingredient_was_found_in_line.append(True)
+            if all(ingredient_was_found_in_line):
+                # Error is happening due to bad recipes being added anyway. Why is this?
+                # Error is with empty lists, where no Trues are added.
+                matching_recipes.append(recipe)
+        show_a_recipe_button_click(matching_recipes)
 
     show_a_recipe_now_button = Button(
         image=button_image_2,
@@ -628,11 +639,11 @@ def show_find_recipe_screen(db_conn, username, user_id):
         recipe_id = str(cursor.fetchone()[0])
         cursor.execute(f"SELECT saved_recipes FROM users WHERE user_id = '{user_id}'")
         saved_recipe_list = cursor.fetchone()[0]
-        if re.search(recipe_id, saved_recipe_list) is not None:
-            messagebox.showinfo("Recipe Already Saved", "This recipe is already in your favorites!")
-            return
         if saved_recipe_list is None or len(saved_recipe_list) == 0:
             cursor.execute(f"UPDATE users SET saved_recipes = {recipe_id} WHERE user_id = {user_id}")
+        elif re.search(recipe_id, saved_recipe_list) is not None:
+            messagebox.showinfo("Recipe Already Saved", "This recipe is already in your favorites!")
+            return
         else:
             saved_recipe_list = saved_recipe_list + ", " + recipe_id
             cursor.execute(f"UPDATE users SET saved_recipes = '{saved_recipe_list}' WHERE user_id = '{user_id}'")
