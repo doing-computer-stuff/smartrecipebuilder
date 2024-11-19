@@ -68,14 +68,14 @@ def create_database_if_not_exists(db_path):
         conn = sqlite3.connect(db_path)
         return conn
 
-def get_user_ingredients_names_as_set(db_conn, user_id):
+def get_user_ingredients_names(db_conn, user_id):
     # Get user ingredients and convert them into a set.
     cursor = db_conn.cursor()
     cursor.execute("SELECT food_name FROM ingredients WHERE user_id = ?", (user_id,))
     user_ingredients = cursor.fetchall()
-    user_ingredient_set = {i[0] for i in user_ingredients}
+    user_ingredient_list = [i[0] for i in user_ingredients]
     cursor.close()
-    return user_ingredient_set
+    return user_ingredient_list
 
 def get_recipe_ingredients_names_as_set(db_conn, user_id, recipe):
     # Get recipe set.
