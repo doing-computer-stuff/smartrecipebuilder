@@ -511,18 +511,7 @@ def show_find_recipe_screen(db_conn, username, user_id):
 
     # search for a recipe by name based on user entered keywords, creates an array of lowercase words,
     # match them to lowercase words in the recipe names pulled from the database
-
-    # If the search words have changes since the last time the button was clicked,
-    # run the database query and display the results, starting with the first result.
-    # if the search words have not changed, move to the next result in the previous search results,
-    # or move back to the start of the list if at the end
-
-    # Ex: Search: 'Ham' - Results: ['Ham & Cheese', 'Ham & Bacon']
-    # Display Ham & Cheese
-    # Button gets clicked again, and the search words are still 'Ham'
-    # Display Ham & Bacon
-    # Button gets clicked again, search words are 'Butter'
-    # Run the database query again and display first result like before.
+    
     searched_words = []
     search_name_num_of_button_clicks = 0
     found_recipes_by_name = []
