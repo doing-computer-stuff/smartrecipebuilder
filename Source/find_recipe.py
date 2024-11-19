@@ -302,9 +302,9 @@ def show_find_recipe_screen(db_conn, username, user_id):
         highlightthickness=0
     )
     recipe_ingredients_field.place(
-        x=410.0,
+        x=380.0,
         y=244.0,
-        width=271.0,
+        width=327.0,
         height=171.0
     )
 
@@ -316,9 +316,9 @@ def show_find_recipe_screen(db_conn, username, user_id):
         highlightthickness=0
     )
     recipe_cooking_method_field.place(
-        x=410.0,
+        x=380.0,
         y=494.0,
-        width=271.0,
+        width=327.0,
         height=271.0
     )
 
@@ -586,11 +586,12 @@ def show_find_recipe_screen(db_conn, username, user_id):
                 params = [f"%{foodName}%" for foodName in search_words]
                 cursor.execute(query, params)
                 found_recipes_by_name = cursor.fetchall()
-                print(found_recipes_by_name)
                 cursor.close()
 
             search_name_num_of_button_clicks += 1
             recipes_len = len(found_recipes_by_name)
+            if recipes_len == 0:
+                messagebox.showwarning("No Recipes Found", "We couldn't find any recipes that match your keywords.")
             current_recipe = found_recipes_by_name[((search_name_num_of_button_clicks % recipes_len) - 1)]
             recipe_name_field.delete(0, 'end')
             recipe_ingredients_field.delete(1.0, 'end')
@@ -601,7 +602,6 @@ def show_find_recipe_screen(db_conn, username, user_id):
 
         else:
             messagebox.showwarning("Empty Search Field", "Please enter search term(s).")
-            print(search_words_input.get().lower())
 
     search_by_name_button = Button(
         image=button_image_4,
@@ -619,7 +619,26 @@ def show_find_recipe_screen(db_conn, username, user_id):
 
     # when button is clicked to favorite recipe, add the currently shown recipe_id to the user's saved recipes array in database
     def add_current_recipe_to_users_saved_recipes():
-        print("This recipe is favorited")
+        recipe_name = recipe_name_field.get()
+        if recipe_name == "":
+            messagebox.showinfo("No Recipe Selected", "Search for a recipe first, then add it to your favorites!")
+            return
+        cursor = db_conn.cursor()
+        cursor.execute(f"SELECT recipe_id FROM recipes WHERE recipe_name = '{recipe_name}'")
+        recipe_id = str(cursor.fetchone()[0])
+        cursor.execute(f"SELECT saved_recipes FROM users WHERE user_id = '{user_id}'")
+        saved_recipe_list = cursor.fetchone()[0]
+        if re.search(recipe_id, saved_recipe_list) is not None:
+            messagebox.showinfo("Recipe Already Saved", "This recipe is already in your favorites!")
+            return
+        if saved_recipe_list is None or len(saved_recipe_list) == 0:
+            cursor.execute(f"UPDATE users SET saved_recipes = {recipe_id} WHERE user_id = {user_id}")
+        else:
+            saved_recipe_list = saved_recipe_list + ", " + recipe_id
+            cursor.execute(f"UPDATE users SET saved_recipes = '{saved_recipe_list}' WHERE user_id = '{user_id}'")
+        db_conn.commit()
+        cursor.close()
+        messagebox.showinfo("Recipe Saved to Favorites", f"You successfully added {recipe_name} to your saved recipes!")
 
     add_to_favorites_button = Button(
         image=button_image_5,
