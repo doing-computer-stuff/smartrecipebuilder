@@ -4,6 +4,7 @@ from tkinter import ttk
 from tkinter import messagebox
 import sqlite3
 from utilities import *
+import re
 
 # Define and initalize data needed for function.
 active = False
@@ -378,7 +379,7 @@ def show_find_recipe_screen(db_conn, username, user_id):
 
     def has_all_ingredients_button_click(filtered_recipes):
         if len(filtered_recipes) <= 0:
-            messagebox.showwarning("No Search Results", "No recipes found that match those filters.")
+            messagebox.showwarning("Empty Search Results", "No recipes found that match those filters.")
             return
         else:
             global search_preferences_button_num_clicks
@@ -392,7 +393,7 @@ def show_find_recipe_screen(db_conn, username, user_id):
 
     def normal_search_button_click(potential_recipes):
         if len(potential_recipes) <= 0:
-            messagebox.showwarning("No Search Results", "No recipes found that match those filters.")
+            messagebox.showwarning("Empty Search Results", "No recipes found that match those filters.")
             return
         else:
             global search_preferences_button_num_clicks
@@ -422,12 +423,12 @@ def show_find_recipe_screen(db_conn, username, user_id):
             or has_all_ingredients_input.get() != has_all_ingredients):
 
             # Reset variables for a first and/or new run.
+            active = True
             search_preferences_button_num_clicks = 0
             recipe_type = recipe_type_input.get()
             cook_time = recipe_cook_time_input.get()
             has_all_ingredients = has_all_ingredients_input.get()
             filtered_recipes = []
-            active = True
             
             # Add the 1=1 to make adding additonal clauses easier.
             query = "SELECT * FROM recipes WHERE 1=1"
@@ -447,15 +448,29 @@ def show_find_recipe_screen(db_conn, username, user_id):
 
             # If the user only wants recipes where they have all the ingredients.
             if has_all_ingredients == "Yes":
-                # Get user ingredients and convert them into a set.
-                user_ingredients_set = get_user_ingredients_names_as_set(db_conn, user_id)
-                # Loop through potential recipes.
+                # Get a list of the users ingredients.
+                fetched_user_ingredients = get_user_ingredients_names(db_conn, user_id)
+                # Grab a recipe from the query.
                 for recipe in potential_recipes:
-                    # Get recipe ingredients as a set.
-                    recipe_ingredients_set = get_recipe_ingredients_names_as_set(db_conn, user_id, recipe)
-                    # Check if the current recipes ingredients is a subset of the users ingredients.
-                    if recipe_ingredients_set.issubset(user_ingredients_set):
-                        # Add them to the filtered list for future use.
+                    recipe_ingredients = recipe[3].split("\n") #the 4th field is the recipe ingredients list split field into array
+                    ingredient_was_found_in_line = []
+                    # Grab an ingredient line from the current recipe (EX: 1/2 Cup Tomatoes Diced)
+                    for line in recipe_ingredients:
+                        found_ingredient = False
+                        # Grab a single ingredient from the users ingredients.
+                        for ingredient in fetched_user_ingredients:
+                            in_line = re.search(ingredient, line, flags=re.IGNORECASE)
+                            if in_line is not None:
+                                found_ingredient = True
+                                break
+                        if found_ingredient is False:
+                            ingredient_was_found_in_line.append(False)
+                            break
+                        else:
+                            ingredient_was_found_in_line.append(True)
+                    if all(ingredient_was_found_in_line):
+                        # Error is happening due to bad recipes being added anyway. Why is this?
+                        # Error is with empty lists, where no Trues are added.
                         filtered_recipes.append(recipe)
                 has_all_ingredients_button_click(filtered_recipes)
 
