@@ -2,8 +2,14 @@ from pathlib import Path
 from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
+import sqlite3
 
 #def show_find_recipe_screen(db_conn, username, user_id):
+
+db_path = "smartrecipebuilder.db"
+db_conn = sqlite3.connect(db_path)
+
+user_id = 4  # or whatever your account is
 
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH / Path(r"assets/find_recipe")
@@ -275,6 +281,7 @@ recipe_name_field = Entry(
     fg="#000716",
     highlightthickness=0
 )
+
 recipe_name_field.place(
     x=502.0,
     y=152.0,
@@ -289,6 +296,7 @@ recipe_ingredients_field = Text(
     fg="#000716",
     highlightthickness=0
 )
+
 recipe_ingredients_field.place(
     x=410.0,
     y=244.0,
@@ -303,6 +311,7 @@ recipe_cooking_method_field = Text(
     fg="#000716",
     highlightthickness=0
 )
+
 recipe_cooking_method_field.place(
     x=410.0,
     y=494.0,
@@ -338,6 +347,7 @@ show_a_recipe_now_button = Button(
     command=generate_a_recipe,
     relief="flat"
 )
+
 show_a_recipe_now_button.place(
     x=80.0,
     y=230.4375,
@@ -380,6 +390,7 @@ find_with_preferences_button = Button(
     command=search_for_recipe_with_preferences,
     relief="flat"
 )
+
 find_with_preferences_button.place(
     x=80.0,
     y=602.4375,
@@ -393,6 +404,7 @@ search_words_input = Entry(
     fg="#000716",
     highlightthickness=0
 )
+
 search_words_input.place(
     x=61.0,
     y=742.0,
@@ -409,14 +421,35 @@ def search_for_recipe_name():
             return True
         return False
 
+
     if not input_is_empty():
         search_words = []
         for word in search_words_input.get().split():
             search_words.append(word.lower())
-        print(search_words)
+        cursor = db_conn.cursor()
+        query = "SELECT recipe_name, recipe_ingredients, recipe_cooking_method FROM recipes WHERE "
+        query += " AND ".join(["recipe_name LIKE ?" for _ in search_words])
+        params = [f"%{foodName}%" for foodName in search_words]
+        cursor.execute(query, params)
+        user_recipes = cursor.fetchall()
+        cursor.close()
+        print(user_recipes)
+
+        # Clear existing data?
+        recipe_name_field.delete(0, 'end')
+        recipe_ingredients_field.delete(1.0, 'end')
+        recipe_cooking_method_field.delete(1.0, 'end')
+
+        for recipe in user_recipes:
+            recipe_name_field.insert(0, recipe[0])
+            recipe_ingredients_field.insert(END, recipe[1])
+            recipe_cooking_method_field.insert(END, recipe[2])
+
     else:
         messagebox.showwarning("Empty Search Field", "Please enter search term(s).")
         print(search_words_input.get().lower())
+
+
 
 search_by_name_button = Button(
     image=button_image_4,
@@ -425,6 +458,7 @@ search_by_name_button = Button(
     command=search_for_recipe_name,
     relief="flat"
 )
+
 search_by_name_button.place(
     x=79.0,
     y=805.4375,
