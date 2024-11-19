@@ -344,7 +344,7 @@ def show_find_recipe_screen(db_conn, username, user_id):
             cursor.execute(query)
             all_recipes = cursor.fetchall()
             cursor.close()
-            user_ingredients_set = get_user_ingredients_names_as_set(db_conn, user_id)
+            user_ingredients_set = get_user_ingredients_names(db_conn, user_id)
             # Loop through potential recipes.
             for recipe in all_recipes:
                 # Get recipe ingredients as a set.
