@@ -511,18 +511,66 @@ def show_find_recipe_screen(db_conn, username, user_id):
 
     # search for a recipe by name based on user entered keywords, creates an array of lowercase words,
     # match them to lowercase words in the recipe names pulled from the database
+
+    # If the search words have changes since the last time the button was clicked,
+    # run the database query and display the results, starting with the first result.
+    # if the search words have not changed, move to the next result in the previous search results,
+    # or move back to the start of the list if at the end
+
+    # Ex: Search: 'Ham' - Results: ['Ham & Cheese', 'Ham & Bacon']
+    # Display Ham & Cheese
+    # Button gets clicked again, and the search words are still 'Ham'
+    # Display Ham & Bacon
+    # Button gets clicked again, search words are 'Butter'
+    # Run the database query again and display first result like before.
+    searched_words = []
+    search_name_num_of_button_clicks = 0
+    found_recipes_by_name = []
+
     def search_for_recipe_name():
+        nonlocal searched_words
+        nonlocal search_name_num_of_button_clicks
+        nonlocal found_recipes_by_name
 
         def input_is_empty():
             if search_words_input.get() == "":
                 return True
             return False
 
+        rerun_search = False
         if not input_is_empty():
             search_words = []
             for word in search_words_input.get().split():
+                if not word in searched_words:
+                    rerun_search = True
                 search_words.append(word.lower())
-            print(search_words)
+
+            if rerun_search:
+                # Reset data since we're running another search
+                searched_words = search_words
+                search_name_num_of_button_clicks = 0
+                # Clear existing data?
+
+
+                cursor = db_conn.cursor()
+                query = "SELECT recipe_name, recipe_ingredients, recipe_cooking_method FROM recipes WHERE "
+                query += " AND ".join(["recipe_name LIKE ?" for _ in search_words])
+                params = [f"%{foodName}%" for foodName in search_words]
+                cursor.execute(query, params)
+                found_recipes_by_name = cursor.fetchall()
+                print(found_recipes_by_name)
+                cursor.close()
+
+            search_name_num_of_button_clicks += 1
+            recipes_len = len(found_recipes_by_name)
+            current_recipe = found_recipes_by_name[((search_name_num_of_button_clicks % recipes_len) - 1)]
+            recipe_name_field.delete(0, 'end')
+            recipe_ingredients_field.delete(1.0, 'end')
+            recipe_cooking_method_field.delete(1.0, 'end')
+            recipe_name_field.insert(0, current_recipe[0])
+            recipe_ingredients_field.insert(END, current_recipe[1])
+            recipe_cooking_method_field.insert(END, current_recipe[2])
+
         else:
             messagebox.showwarning("Empty Search Field", "Please enter search term(s).")
             print(search_words_input.get().lower())
