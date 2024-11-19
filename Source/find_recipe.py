@@ -325,22 +325,46 @@ def show_find_recipe_screen(db_conn, username, user_id):
     show_recipe_button_num_clicks = 0
 
     # fetch all recipes from the database that match the users ingredients and cycle through with button click
+    generate_recipe_button_clicks = 0
+    filtered_recipes_for_user = []
     def generate_a_recipe():
+        # If the user only wants recipes where they have all the ingredients.
+        # Get user ingredients and convert them into a set
+        nonlocal generate_recipe_button_clicks
+        nonlocal filtered_recipes_for_user
 
-        global show_recipe_button_num_clicks
+        # If they have already looked at all the previously searched recipes,
+        # preform another search in case anything changed.
+        if len(filtered_recipes_for_user) <= generate_recipe_button_clicks:
+            filtered_recipes_for_user = []
+            generate_recipe_button_clicks = 0
+            query = "SELECT recipe_name, recipe_type, recipe_ingredients FROM recipes"
+            cursor = db_conn.cursor()
+            cursor.execute(query)
+            all_recipes = cursor.fetchall()
+            cursor.close()
+            user_ingredients_set = get_user_ingredients_names_as_set(db_conn, user_id)
+            # Loop through potential recipes.
+            for recipe in all_recipes:
+                # Get recipe ingredients as a set.
+                recipe_ingredients_set = set(recipe[2].split("\t"))
+                # Check if the current recipes ingredients is a subset of the users ingredients.
+                if recipe_ingredients_set.issubset(user_ingredients_set):
+                    # Add them to the filtered list for future use.
+                    filtered_recipes_for_user.append(recipe)
+
+        if len(filtered_recipes_for_user) <= 0:
+            messagebox.showwarning("No Search Results", "No recipes found that match those filters.")
+            return
+
+        generate_recipe_button_clicks += 1
+        current_recipe = filtered_recipes_for_user[generate_recipe_button_clicks - 1]
         recipe_name_field.delete(0,'end')
         recipe_ingredients_field.delete(1.0, 'end')
         recipe_cooking_method_field.delete(1.0, 'end')
-        print("Show a Recipe button clicked, fetch all recipes that include the user's ingredients then show one for each click")
-        recipes = ["Recipe 1", "Recipe 2", "Recipe 3"]
-        if show_recipe_button_num_clicks < len(recipes):
-            recipe_name_field.insert(0, recipes[show_recipe_button_num_clicks])
-            recipe_ingredients_field.insert(END, "Ingredents for " + recipes[show_recipe_button_num_clicks])
-            recipe_cooking_method_field.insert(END, "Cooking method for " + recipes[show_recipe_button_num_clicks])
-            show_recipe_button_num_clicks += 1
-        else:
-            show_recipe_button_num_clicks = 0
-            generate_a_recipe()
+        recipe_name_field.insert(0, current_recipe[0])
+        recipe_ingredients_field.insert(END, current_recipe[1])
+        recipe_cooking_method_field.insert(END, current_recipe[2])
 
     show_a_recipe_now_button = Button(
         image=button_image_2,
@@ -512,17 +536,6 @@ def show_find_recipe_screen(db_conn, username, user_id):
     # search for a recipe by name based on user entered keywords, creates an array of lowercase words,
     # match them to lowercase words in the recipe names pulled from the database
 
-    # If the search words have changes since the last time the button was clicked,
-    # run the database query and display the results, starting with the first result.
-    # if the search words have not changed, move to the next result in the previous search results,
-    # or move back to the start of the list if at the end
-
-    # Ex: Search: 'Ham' - Results: ['Ham & Cheese', 'Ham & Bacon']
-    # Display Ham & Cheese
-    # Button gets clicked again, and the search words are still 'Ham'
-    # Display Ham & Bacon
-    # Button gets clicked again, search words are 'Butter'
-    # Run the database query again and display first result like before.
     searched_words = []
     search_name_num_of_button_clicks = 0
     found_recipes_by_name = []
