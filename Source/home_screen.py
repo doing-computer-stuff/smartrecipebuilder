@@ -97,6 +97,8 @@ def show_home_screen(db_conn, username, user_id):
     ingredients_table.column("Expiration Date", width="100", anchor="c", stretch=NO)
     ingredients_table.heading("Quantity", text="Quantity")
     ingredients_table.column("Quantity", width="80", anchor="c", stretch=NO)
+    ingredients_table.tag_configure('expired', background='#F27E92')
+    ingredients_table.tag_configure('not_expired', background='#D9D9D9')
 
     cursor = db_conn.cursor()
     cursor.execute("SELECT food_name, expiration_date, quantity FROM ingredients WHERE user_id = ?", (user_id,))
@@ -105,7 +107,11 @@ def show_home_screen(db_conn, username, user_id):
     user_inventory_sorted_by_date = sorted(user_inventory, key=lambda x: datetime.strptime(x[1], "%m/%d/%Y"))
     iid = 0
     for item in user_inventory_sorted_by_date:
-        ingredients_table.insert(parent="", index="end", iid=iid, values=(item[0], item[1], item[2]))
+        if datetime.strptime(item[1], "%m/%d/%Y") < datetime.today():
+            tag = 'expired'
+        else:
+            tag = 'not_expired'
+        ingredients_table.insert(parent="", index="end", iid=iid, values=(item[0], item[1], item[2]), tags=(tag))
         iid += 1
 
     ingredients_table.place(x=75, y=200, width=348, height=400)
@@ -130,6 +136,7 @@ def show_home_screen(db_conn, username, user_id):
     )
 
     def navigate_to_find_new_recipes_screen():
+        print("Find New Recipe button clicked")
         from find_recipe import show_find_recipe_screen
         window.destroy()
         show_find_recipe_screen(db_conn, username, user_id)

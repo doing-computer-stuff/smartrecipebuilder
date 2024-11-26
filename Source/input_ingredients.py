@@ -210,7 +210,11 @@ def show_input_ingredients_screen(db_conn, username, user_id):
             user_inventory_sorted_by_date = sorted(user_inventory, key=lambda x: datetime.strptime(x[1], "%m/%d/%Y"))
             iid = 0
             for item in user_inventory_sorted_by_date:
-                ingredients_table.insert(parent="", index="end", iid=iid,values=(item[0], item[1], item[2]))
+                if datetime.strptime(item[1], "%m/%d/%Y") < datetime.today():
+                    tag = 'expired'
+                else:
+                    tag = 'not_expired'
+                ingredients_table.insert(parent="", index="end", iid=iid, values=(item[0], item[1], item[2]), tags=(tag))
                 iid += 1
             db_conn.commit()
             cursor.close()
@@ -297,9 +301,9 @@ def show_input_ingredients_screen(db_conn, username, user_id):
     style.configure("TCombobox", background="#D9D9D9", fieldbackground="#D9D9D9")
     style.map("TCombobox", background=[("selected", "#284846")])
     units_input = ttk.Combobox(window, state="readonly", width=13,
-                               values=("none", "bag", "bags", "box", "boxes", "can", "cans", "cup", "cups", "gallon",
-                                       "gallons", "loaf", "loaves", "ounce", "ounces", "package", "packages", "pound",
-                                       "pounds", "quart", "quarts"), style="TCombobox")
+                               values=("none", "bag", "bags", "bottle", "bottles", "box", "boxes", "can", "cans", "carton", "cartons", "container", "containers",
+                                       "cup", "cups", "gallon", "gallons", "head", "heads", "jar", "jars", "loaf", "loaves", "ounce", "ounces", "package",
+                                       "packages", "pound", "pounds", "quart", "quarts", "stick", "sticks"), style="TCombobox")
     units_input.set("none")
     units_input.place(anchor="nw", x=200, y=266)
 
@@ -343,6 +347,8 @@ def show_input_ingredients_screen(db_conn, username, user_id):
     ingredients_table.column("Expiration Date", width="130", anchor="c", stretch=NO)
     ingredients_table.heading("Quantity", text="Quantity")
     ingredients_table.column("Quantity", width="130", anchor="c", stretch=NO)
+    ingredients_table.tag_configure('expired', background='#F27E92')
+    ingredients_table.tag_configure('not_expired', background='#D9D9D9')
 
     cursor = db_conn.cursor()
     cursor.execute("SELECT food_name, expiration_date, quantity FROM ingredients WHERE user_id = ?", (user_id,))
@@ -351,7 +357,11 @@ def show_input_ingredients_screen(db_conn, username, user_id):
     user_inventory_sorted_by_date = sorted(user_inventory, key=lambda x: datetime.strptime(x[1], "%m/%d/%Y"))
     iid = 0
     for item in user_inventory_sorted_by_date:
-        ingredients_table.insert(parent="", index="end", iid=iid, values=(item[0], item[1], item[2]))
+        if datetime.strptime(item[1], "%m/%d/%Y") < datetime.today():
+            tag = 'expired'
+        else:
+            tag = 'not_expired'
+        ingredients_table.insert(parent="", index="end", iid=iid, values=(item[0], item[1], item[2]), tags=(tag))
         iid += 1
 
     ingredients_table.place(x=340, y=179, width=390, height=378)
