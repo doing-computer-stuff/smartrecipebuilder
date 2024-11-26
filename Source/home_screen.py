@@ -136,7 +136,6 @@ def show_home_screen(db_conn, username, user_id):
     )
 
     def navigate_to_find_new_recipes_screen():
-        print("Find New Recipe button clicked")
         from find_recipe import show_find_recipe_screen
         window.destroy()
         show_find_recipe_screen(db_conn, username, user_id)
