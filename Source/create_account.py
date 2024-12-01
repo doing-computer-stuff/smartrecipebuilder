@@ -1,10 +1,16 @@
+"""Module provides functionality related to user account creation.
+"""
 from pathlib import Path
 from tkinter import *
 from tkinter import messagebox
 from utilities import *
 
 def show_create_account(db_conn):
-
+    """Displays the create account screen to the user.
+    
+    Args:
+        db_conn (conn): The database connection.
+    """
     OUTPUT_PATH = Path(__file__).parent
     ASSETS_PATH = OUTPUT_PATH / Path(r"assets/create_account_screen")
 
@@ -152,9 +158,8 @@ def show_create_account(db_conn):
         height=39.0
     )
 
-    # Create account button and function.
     def create_account():
-
+        """Creates an account for user and does data validation."""
         selected_username = username_input.get()
         selected_password = password_input.get()
         confirmed_password = confirm_password_input.get()
@@ -169,7 +174,7 @@ def show_create_account(db_conn):
             messagebox.showwarning("Error", "Passwords do not match.")
             return
 
-        # Prevent duplicate usernames
+        """Prevent duplicate usernames."""
         def is_available_username():
             cursor = db_conn.cursor()
             cursor.execute("SELECT COUNT(*) FROM users WHERE username = ?", (selected_username,))
@@ -183,16 +188,16 @@ def show_create_account(db_conn):
 
         if is_available_username():
 
-            # Hash the password before storing into database.
+            """Hash the password before storing into database."""
             hashed_password = hash_password(selected_password)
 
-            # Create a cursor to execute SQL commands.
+            """Create a cursor to execute SQL commands."""
             cursor = db_conn.cursor()
 
-            # Execute query to insert new user data into user database.
+            """Execute query to insert new user data into user database."""
             cursor.execute("INSERT INTO users (username, user_password) VALUES (?, ?)", (selected_username, hashed_password))
 
-            # Commit changes to the database and close connection to cursor.
+            """Commit changes to the database and close connection to cursor."""
             db_conn.commit()
             cursor.close()
 
@@ -215,8 +220,8 @@ def show_create_account(db_conn):
         height=41.0
     )
 
-    # Back button function
     def navigate_to_login_screen():
+        """Back button function."""
         from login import show_login_screen
         window.destroy()
         show_login_screen(db_conn)
