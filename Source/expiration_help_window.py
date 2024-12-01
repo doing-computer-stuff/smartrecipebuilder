@@ -1,33 +1,35 @@
+"""Module displays help information to the user related to food expiration dates
+"""
 import tkinter as tk
 from tkinter import ttk
 
 def show_expiration_help_window():
-
-    # Create the window
+    """Creates and displays the help window to the user.
+    """
     window = tk.Tk()
     window.geometry("330x250+150+220")
     window.configure(bg="#4EB276")
     window.title("Expiration Date Guidelines")
     window.resizable(False, False)
 
-    # Define Table Styling
+    """Define Table Styling."""
     style = ttk.Style(window)
     style.theme_use("clam")
     style.configure("Treeview", background="#D9D9D9", fieldbackground="#D9D9D9", borderdwidth=0, relief="flat")
     style.map('Treeview', background=[('selected', '#284846')])
 
-    # Create the Treeview
+    """Create the Treeview."""
     table = ttk.Treeview(window, columns=("Column 1", "Column 2"), show="headings", style="Treeview")
     vsb = ttk.Scrollbar(window, orient="vertical", command=table.yview)
     vsb.pack(side='right', fill='y')
-
-    # Define the headings
+    
+    """Define the headings."""
     table.heading("Column 1", text="Product")
     table.column("Column 1", width="165", anchor="c")
     table.heading("Column 2", text="Shelf Life")
     table.column("Column 2", width="165", anchor="c")
 
-    # Insert some grocery data
+    """Insert some grocery data."""
     table.insert("", tk.END, values=("Tomatoes", "5-7 Days"))
     table.insert("", tk.END, values=("Leafy Greens", "10-12 Days"))
     table.insert("", tk.END, values=("Celery", "14-21 Days"))
@@ -41,5 +43,5 @@ def show_expiration_help_window():
     table.insert("", tk.END, values=("Mushrooms", "7-8 Days"))
     table.insert("", tk.END, values=("Potatoes", "21-35 Days"))
 
-    # Pack the table
+    """Pack the table"""
     table.pack(expand=1)
