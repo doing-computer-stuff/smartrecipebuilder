@@ -1,9 +1,17 @@
+"""This module supplies the functionality to add a recipe to the system.
+"""
 from pathlib import Path
 from tkinter import *
 from tkinter import ttk, messagebox
 
 def show_add_recipe_screen(db_conn, username, user_id):
-
+    """Displays the add recipe screen to the user.
+    
+    Args:
+        db_conn (conn): The database connection.
+        username (string): The username.
+        user_id (string): The user ID.
+    """
     OUTPUT_PATH = Path(__file__).parent
     ASSETS_PATH = OUTPUT_PATH / Path(r"assets/add_recipe")
 
@@ -212,7 +220,7 @@ def show_add_recipe_screen(db_conn, username, user_id):
         height=263.0
     )
 
-    # dropdowns for input boxes
+    """Dropdowns for input boxes."""
     style = ttk.Style(window)
     style.theme_use("clam")
     style.configure("TCombobox", background="#D9D9D9", fieldbackground="#D9D9D9")
@@ -236,9 +244,8 @@ def show_add_recipe_screen(db_conn, username, user_id):
     add_to_favorites_input.set("Yes")
     add_to_favorites_input.place(anchor="nw", x=538, y=868)
 
-    # add the user provided recipe to the database
     def add_recipe():
-
+        """Adds the user provided recipe to the database."""
         def input_is_empty(input_field):
             if input_field == "":
                 return True
@@ -272,7 +279,7 @@ def show_add_recipe_screen(db_conn, username, user_id):
             recipe_cooking_method_field.delete(1.0, 'end')
             recipe_was_added = True
 
-        # update users saved recipe list if recipe is favorited
+        """Update users saved recipe list if recipe is favorited."""
         if add_to_favorites == "Yes" and recipe_was_added:
             cursor = db_conn.cursor()
             cursor.execute("SELECT recipe_id FROM recipes WHERE recipe_name = (?)", (recipe_name,))
