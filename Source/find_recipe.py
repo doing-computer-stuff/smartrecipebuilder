@@ -1,3 +1,15 @@
+"""Module provides functionality for finding a recipe in the system.
+
+Attributes:
+    active (bool): Indicates if function is active.
+    cook_time (int): The time to cook.
+    filtered_recipes (list): The recipes that match the filters.
+    has_all_ingredients (bool): Indicates if user has all the ingredients of the recipe.
+    potential_recipes (list): List of initial recipes before filtering.
+    recipe_type (string): Breakfast, lunch, dinner, snack, etc.
+    search_preferences_button_num_clicks (int): Number of times user has clicked search.
+
+"""
 from pathlib import Path
 from tkinter import *
 from tkinter import ttk
@@ -5,7 +17,6 @@ from tkinter import messagebox
 from utilities import *
 import re
 
-# Define and initalize data needed for function.
 active = False
 search_preferences_button_num_clicks = 0
 potential_recipes = []
@@ -15,7 +26,14 @@ cook_time = None
 has_all_ingredients = None
 
 def show_find_recipe_screen(db_conn, username, user_id):
+    """Displays the find recipe screen.
+    
+    Args:
+        db_conn (conn): Connection to database.
+        username (string): Users username.
+        user_id (string): Users user ID.
 
+    """
     OUTPUT_PATH = Path(__file__).parent
     ASSETS_PATH = OUTPUT_PATH / Path(r"assets/find_recipe")
 
@@ -321,17 +339,17 @@ def show_find_recipe_screen(db_conn, username, user_id):
         height=271.0
     )
 
-    # use to cycle through found recipes
+    """Use to cycle through found recipes."""
     global show_a_recipe_button_num_clicks
     show_a_recipe_button_num_clicks = 0
 
-    # fetch all recipes from the database that match the users ingredients and cycle through with button click
+    """Fetch all recipes from the database that match the users ingredients and cycle through with button click."""
     generate_recipe_button_clicks = 0
     filtered_recipes_for_user = []
     def generate_a_recipe():
-
-        # If the user only wants recipes where they have all the ingredients.
-        # Get user ingredients and convert them into a set
+        """Function grabs a random recipe for the user where they have all the ingredients."""
+        """If the user only wants recipes where they have all the ingredients."""
+        """Get user ingredients and convert them into a set."""
         def show_a_recipe_button_click(matching_recipes):
             if len(matching_recipes) <= 0:
                 messagebox.showwarning("Empty Search Results", "No recipes found that match those filters.")
@@ -353,15 +371,15 @@ def show_find_recipe_screen(db_conn, username, user_id):
         all_recipes = cursor.fetchall()
         fetched_user_ingredients = get_user_ingredients_names(db_conn, user_id)
         matching_recipes = []
-        # Grab a recipe from the query.
+        """Grab a recipe from the query."""
         for recipe in all_recipes:
             recipe_ingredients = recipe[3].split(
                 "\n")  # the 4th field is the recipe ingredients list split field into array
             ingredient_was_found_in_line = []
-            # Grab an ingredient line from the current recipe (EX: 1/2 Cup Tomatoes Diced)
+            """Grab an ingredient line from the current recipe (EX: 1/2 Cup Tomatoes Diced)"""
             for line in recipe_ingredients:
                 found_ingredient = False
-                # Grab a single ingredient from the users ingredients.
+                """Grab a single ingredient from the users ingredients."""
                 for ingredient in fetched_user_ingredients:
                     in_line = re.search(ingredient, line, flags=re.IGNORECASE)
                     if in_line is not None:
@@ -373,8 +391,6 @@ def show_find_recipe_screen(db_conn, username, user_id):
                 else:
                     ingredient_was_found_in_line.append(True)
             if all(ingredient_was_found_in_line):
-                # Error is happening due to bad recipes being added anyway. Why is this?
-                # Error is with empty lists, where no Trues are added.
                 matching_recipes.append(recipe)
         show_a_recipe_button_click(matching_recipes)
 
@@ -392,7 +408,7 @@ def show_find_recipe_screen(db_conn, username, user_id):
         height=33.3125
     )
 
-    # dropdowns for search preferences inputs
+    """Dropdowns for search preferences inputs."""
     style = ttk.Style(window)
     style.theme_use("clam")
     style.configure("TCombobox", background="#D9D9D9", fieldbackground="#D9D9D9")
@@ -440,9 +456,11 @@ def show_find_recipe_screen(db_conn, username, user_id):
             recipe_cooking_method_field.insert(END, potential_recipes[search_preferences_button_num_clicks][4])
             search_preferences_button_num_clicks += 1
 
-    # Searches for recipes based on the user defined filters.
     def search_for_recipe_with_preferences():
-        # Initialize variables needed.
+        """Searches for recipes based on the user defined filters.
+        """
+        
+        """Initialize variables needed."""
         global active
         global search_preferences_button_num_clicks
         global potential_recipes
@@ -451,13 +469,13 @@ def show_find_recipe_screen(db_conn, username, user_id):
         global cook_time
         global has_all_ingredients
 
-        # Check if it is the first iteration or for any changes in the filters.
+        """Check if it is the first iteration or for any changes in the filters."""
         if (active == False 
             or recipe_type_input.get() != recipe_type 
             or recipe_cook_time_input.get() != cook_time 
             or has_all_ingredients_input.get() != has_all_ingredients):
 
-            # Reset variables for a first and/or new run.
+            """Reset variables for a first and/or new run."""
             active = True
             search_preferences_button_num_clicks = 0
             recipe_type = recipe_type_input.get()
@@ -465,10 +483,10 @@ def show_find_recipe_screen(db_conn, username, user_id):
             has_all_ingredients = has_all_ingredients_input.get()
             filtered_recipes = []
             
-            # Add the 1=1 to make adding additonal clauses easier.
+            """Add the 1=1 to make adding additonal clauses easier."""
             query = "SELECT * FROM recipes WHERE 1=1"
             params = []
-            # Add filters dynamically.
+            """Add filters dynamically."""
             if recipe_type != "No Preference":
                 query += " AND recipe_type = ?"
                 params.append(recipe_type)
@@ -476,23 +494,23 @@ def show_find_recipe_screen(db_conn, username, user_id):
                 query += " AND recipe_cook_time = ?"
                 params.append(cook_time)
 
-            # Execute the query.
+            """Execute the query."""
             cursor = db_conn.cursor()
             cursor.execute(query, params)
             potential_recipes = cursor.fetchall()
 
-            # If the user only wants recipes where they have all the ingredients.
+            """If the user only wants recipes where they have all the ingredients."""
             if has_all_ingredients == "Yes":
-                # Get a list of the users ingredients.
+                """Get a list of the users ingredients."""
                 fetched_user_ingredients = get_user_ingredients_names(db_conn, user_id)
-                # Grab a recipe from the query.
+                """Grab a recipe from the query."""
                 for recipe in potential_recipes:
                     recipe_ingredients = recipe[3].split("\n") #the 4th field is the recipe ingredients list split field into array
                     ingredient_was_found_in_line = []
-                    # Grab an ingredient line from the current recipe (EX: 1/2 Cup Tomatoes Diced)
+                    """Grab an ingredient line from the current recipe (EX: 1/2 Cup Tomatoes Diced)."""
                     for line in recipe_ingredients:
                         found_ingredient = False
-                        # Grab a single ingredient from the users ingredients.
+                        """Grab a single ingredient from the users ingredients."""
                         for ingredient in fetched_user_ingredients:
                             in_line = re.search(ingredient, line, flags=re.IGNORECASE)
                             if in_line is not None:
@@ -504,16 +522,14 @@ def show_find_recipe_screen(db_conn, username, user_id):
                         else:
                             ingredient_was_found_in_line.append(True)
                     if all(ingredient_was_found_in_line):
-                        # Error is happening due to bad recipes being added anyway. Why is this?
-                        # Error is with empty lists, where no Trues are added.
                         filtered_recipes.append(recipe)
                 has_all_ingredients_button_click(filtered_recipes)
 
             else:
                 normal_search_button_click(potential_recipes)
 
-        # If it is not a first or new run, display the next recipe and iterate the needed values.
-        # If loop has reached its end, reset it.
+        """If it is not a first or new run, display the next recipe and iterate the needed values.
+        If loop has reached its end, reset it."""
         else:
             if has_all_ingredients == "Yes":
                 if search_preferences_button_num_clicks < len(filtered_recipes):
@@ -559,14 +575,15 @@ def show_find_recipe_screen(db_conn, username, user_id):
         height=39.0
     )
 
-    # search for a recipe by name based on user entered keywords, creates an array of lowercase words,
-    # match them to lowercase words in the recipe names pulled from the database
+    """Search for a recipe by name based on user entered keywords, creates an array of lowercase words,
+    match them to lowercase words in the recipe names pulled from the database."""
     
     searched_words = []
     search_name_num_of_button_clicks = 0
     found_recipes_by_name = []
 
     def search_for_recipe_name():
+        """Searches for a recipe name matching or near matching the entered values."""
         nonlocal searched_words
         nonlocal search_name_num_of_button_clicks
         nonlocal found_recipes_by_name
@@ -585,10 +602,9 @@ def show_find_recipe_screen(db_conn, username, user_id):
                 search_words.append(word.lower())
 
             if rerun_search:
-                # Reset data since we're running another search
+                """Reset data since we're running another search."""
                 searched_words = search_words
                 search_name_num_of_button_clicks = 0
-                # Clear existing data?
 
 
                 cursor = db_conn.cursor()
@@ -628,8 +644,10 @@ def show_find_recipe_screen(db_conn, username, user_id):
         height=33.3125
     )
 
-    # when button is clicked to favorite recipe, add the currently shown recipe_id to the user's saved recipes array in database
     def add_current_recipe_to_users_saved_recipes():
+        """When button is clicked to favorite recipe, 
+        add the currently shown recipe_id to the user's saved recipes array in database.
+        """
         recipe_name = recipe_name_field.get()
         if recipe_name == "":
             messagebox.showinfo("No Recipe Selected", "Search for a recipe first, then add it to your favorites!")
