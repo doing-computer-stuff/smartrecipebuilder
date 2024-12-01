@@ -1,10 +1,18 @@
+"""Module provides the functionality of the homescreen.
+"""
 from pathlib import Path
 from tkinter import *
 from tkinter import ttk
 from datetime import *
 
 def show_home_screen(db_conn, username, user_id):
-
+    """Displays the homescreen to the user and its related data and functionality.
+    
+    Args:
+        db_conn (conn): Connection to database.
+        username (string): Users username.
+        user_id (string): Users user ID.
+    """
     OUTPUT_PATH = Path(__file__).parent
     ASSETS_PATH = OUTPUT_PATH / Path(r"assets/home_screen")
 
@@ -84,7 +92,7 @@ def show_home_screen(db_conn, username, user_id):
         font=("Inter Bold", 20 * -1)
     )
 
-    # table setup
+    """Table setup."""
     style = ttk.Style(window)
     style.theme_use("clam")
     style.configure("Treeview", background="#D9D9D9", fieldbackground="#D9D9D9", borderdwidth=0, relief="flat")
@@ -100,6 +108,7 @@ def show_home_screen(db_conn, username, user_id):
     ingredients_table.tag_configure('expired', background='#F27E92')
     ingredients_table.tag_configure('not_expired', background='#D9D9D9')
 
+    """Display the pantry to the user."""
     cursor = db_conn.cursor()
     cursor.execute("SELECT food_name, expiration_date, quantity FROM ingredients WHERE user_id = ?", (user_id,))
     user_inventory = cursor.fetchall()
