@@ -1,9 +1,17 @@
+"""Module that handles the users saved recipes.
+"""
 from pathlib import Path
 from tkinter import *
 from tkinter import ttk, messagebox
 
 def show_saved_recipes_screen(db_conn, username, user_id):
-
+    """Displays the saved recipes screen to the user and its related functionality.
+    
+    Args:
+        db_conn (conn): Database connection.
+        username (string): Users username.
+        user_id (string): Users ID.
+    """
     OUTPUT_PATH = Path(__file__).parent
     ASSETS_PATH = OUTPUT_PATH / Path(r"assets/saved_recipes")
 
@@ -145,7 +153,7 @@ def show_saved_recipes_screen(db_conn, username, user_id):
         height=270.0
     )
 
-    # style, create, populate saved recipe list
+    """Style, create, populate saved recipe list."""
     style = ttk.Style(window)
     style.theme_use("clam")
     style.configure("Treeview", background="#D9D9D9", fieldbackground="#D9D9D9", borderdwidth=0, relief="flat")
@@ -170,6 +178,7 @@ def show_saved_recipes_screen(db_conn, username, user_id):
     recipe_list.place(x=26, y=261, width=304, height=400)
 
     def view_selected_recipe():
+        """Displays the selected recipe to the user."""
         selected_recipe = recipe_list.focus()
         if len(selected_recipe) == 0:
             messagebox.showinfo("Selection Required", "Select a Recipe from the list to view it.")
@@ -202,6 +211,7 @@ def show_saved_recipes_screen(db_conn, username, user_id):
     )
 
     def remove_selected_recipe():
+        """Removes the selected recipe from the users saved recipes."""
         selected_recipe = recipe_list.selection()
         if len(selected_recipe) == 0:
             messagebox.showinfo("Selection Required", "Select a Recipe from the list to remove it.")
@@ -211,7 +221,7 @@ def show_saved_recipes_screen(db_conn, username, user_id):
             for recipe in saved_recipe_list_details:
                 if recipe_name in recipe[1]:
                     recipe_id = str(recipe[0])
-            # this is used to properly format the saved recipe list after selected recipe is removed
+            """This is used to properly format the saved recipe list after selected recipe is removed."""
             recipe_id_with_preceeding_comma = ", " + recipe_id
             recipe_id_with_following_comma = recipe_id + ", "
             if recipe_id_with_preceeding_comma in user_saved_recipe_list:
