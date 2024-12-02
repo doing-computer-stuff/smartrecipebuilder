@@ -1,10 +1,16 @@
+"""Module for resetting the users password.
+"""
 from pathlib import Path
 from tkinter import *
 from tkinter import messagebox
 from utilities import *
 
 def show_reset_password(db_conn):
-
+    """Displays the reset password screen to the user and its functionality.
+    
+    Args:
+        db_conn (conn): Database connection.
+    """
     OUTPUT_PATH = Path(__file__).parent
     ASSETS_PATH = OUTPUT_PATH / Path(r"assets/reset_password_screen")
 
@@ -143,13 +149,21 @@ def show_reset_password(db_conn):
         height=39.0
     )
 
-    # Method to reset the password of the user.
     def password_reset():
+        """Method to reset the password of the user.
+        """
 
-        # If the provided passwords match, connect to the user database
-        # and update the password of the user.
+        """If the provided passwords match, connect to the user database
+        and update the password of the user."""
         def valid_username(username):
-            # Verify that the username exists in the db
+            """Verify that the username exists in the db.
+            
+            Args:
+                username (string): Users username.
+            
+            Returns:
+                bool: If username is unique.
+            """
             cursor = db_conn.cursor()
             cursor.execute("SELECT COUNT(*) FROM users WHERE username = ?", (username,))
             result = cursor.fetchone()
@@ -175,16 +189,16 @@ def show_reset_password(db_conn):
         confirm_password = confirm_new_password_input.get()
         if new_password == confirm_password:
 
-            # Hash the new password before updating the database.
+            """Hash the new password before updating the database."""
             hashed_password = hash_password(new_password)
 
-            # Create a cursor to execute SQL commands.
+            """Create a cursor to execute SQL commands."""
             cursor = db_conn.cursor()
 
-            # Execute query to update users password.
+            """Execute query to update users password."""
             cursor.execute("UPDATE users SET user_password = ? WHERE username = ?", (hashed_password, username))
             
-            # Commit changes to the database and close connection to cursor.
+            """Commit changes to the database and close connection to cursor."""
             db_conn.commit()
             cursor.close()
 
