@@ -1,3 +1,5 @@
+"""Module supplies login functionality.
+"""
 from pathlib import Path
 from tkinter import *
 from tkinter import messagebox
@@ -13,7 +15,7 @@ def show_login_screen(db_conn):
     def relative_to_assets(path: str) -> Path:
         return ASSETS_PATH / Path(path)
 
-    # Create window and canvas and center on screen.
+    """Create window and canvas and center on screen."""
     window = Tk()
     window.geometry("700x436+500+80")
     window.configure(bg="#4EB276")
@@ -31,7 +33,7 @@ def show_login_screen(db_conn):
     )
     canvas.place(x = 0, y = 0)
 
-    # Place images
+    """Place images."""
     image_image_2 = PhotoImage(
         file=relative_to_assets("image_2.png"))
     image_2 = canvas.create_image(
@@ -56,7 +58,7 @@ def show_login_screen(db_conn):
     button_image_1 = PhotoImage(
         file=relative_to_assets("button_1.png"))
 
-    # Place text
+    """Place text."""
     canvas.create_text(
         189.0,
         45.0,
@@ -90,7 +92,7 @@ def show_login_screen(db_conn):
         font=("Inter Bold", 14 * -1)
     )
 
-    # Place entry fields
+    """Place entry fields."""
     username_input = Entry(
         bd=0,
         bg="#D9D9D9",
@@ -119,7 +121,7 @@ def show_login_screen(db_conn):
     )
 
 
-    # Links and functions for create account and reset password.
+    """Links and functions for create account and reset password."""
     def navigate_to_create_account():
         from create_account import show_create_account
         window.destroy()
@@ -138,13 +140,17 @@ def show_login_screen(db_conn):
                                     fg="#ffffff", activeforeground="#284846", bg="#4EB276", activebackground="#4EB276", bd=0, command=navigate_to_reset_passsword)
     reset_password_link.place(x=480, y=383)
 
-
-    # login button and function
     def login():
+        """Logs the user in and does authentication.
+        """
         from home_screen import show_home_screen
 
         def valid_username(username):
-            # Verify that the username exists in the db.
+            """Verifies that the username exists in the db.
+            
+            Args:
+                username (string): Users username.
+            """
             cursor = db_conn.cursor()
             cursor.execute("SELECT COUNT(*) FROM users WHERE username = ?", (username,))
             result = cursor.fetchone()
@@ -153,23 +159,37 @@ def show_login_screen(db_conn):
                 return False
             return True
 
-        # Method to check whether the given username and password are in the database.
-        # Returns true if there is at least one row with the given username AND password.
         def verify_login_credentials(username, password):
+            """Method to check whether the given username and password are in the database.
+            Returns true if there is at least one row with the given username AND password.
+            
+            Args:
+                username (string): Users username.
+                password (string): Users password.
+            
+            Returns:
+                bool: If passwords match.
+            """
             cursor = db_conn.cursor()
-            # Execute query to see whether user exists.
+            """Execute query to see whether user exists."""
             cursor.execute(
             "SELECT user_password FROM users WHERE username = ?",
             (username,))
-            # Under assumption usernames are unique!
             db_password = cursor.fetchall()[0][0]
             cursor.close()
             return compare_passwords(db_password, password)
 
-        # Method to check whether the given username and password are in the database.
         def get_user_info(username):
+            """Method to check whether the given username and password are in the database.
+            
+            Args:
+                username (string): Users username.
+            
+            Returns:
+                string: Users username and user ID.
+            """
             cursor = db_conn.cursor()
-            # Execute query to see whether user exists.
+            """Execute query to see whether user exists."""
             cursor.execute("SELECT username, user_id FROM users WHERE username = ?", (username,))
             result = cursor.fetchone()
             cursor.close()
@@ -182,7 +202,7 @@ def show_login_screen(db_conn):
             if verify_login_credentials(username, password):
                 user_info = get_user_info(username)
                 window.destroy()
-                # Pass the database connection and user ID here.
+                """Pass the database connection and user ID here."""
                 show_home_screen(db_conn, user_info[0], user_info[1])
             else:
                 messagebox.showwarning("Invalid Credentials", "Incorrect Password.")
