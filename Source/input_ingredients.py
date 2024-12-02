@@ -1,3 +1,5 @@
+"""Module provides functionality related to adding ingredients to the users pantry.
+"""
 from pathlib import Path
 from tkinter import *
 import tkinter as tk
@@ -7,7 +9,13 @@ import re
 from datetime import *
 
 def show_input_ingredients_screen(db_conn, username, user_id):
-
+    """Display the input ingredients screen to the user.
+    
+    Args:
+        db_conn (conn): The database connection.
+        username (string): The username
+        user_id (string): The user ID.
+    """
     OUTPUT_PATH = Path(__file__).parent
     ASSETS_PATH = OUTPUT_PATH / Path(r"assets/input_ingredients")
 
@@ -163,25 +171,46 @@ def show_input_ingredients_screen(db_conn, username, user_id):
     )
 
     def add_ingredient():
-
+        """Adds an ingredient to the users pantry and does input validation.
+        """
         def no_blank_fields():
+            """Checks for no data entry.
+            
+            Returns:
+                bool: If data is not empty.
+            """
             if (ingredient_name_input.get() and quantity_input.get() and expiration_date_input.get()) != "":
                 return True
             return False
 
         def ingredient_name_is_valid():
+            """Checks if name is valid.
+            
+            Returns:
+                bool: If length of name is valid.
+            """
             ingredient_name = ingredient_name_input.get()
             if len(ingredient_name) <= 50:
                 return True
             return False
 
         def quantity_is_valid():
+            """Checks if quantity is valid.
+            
+            Returns:
+                bool: If quantity is within acceptable range.
+            """
             quantity = quantity_input.get()
             if (quantity.isnumeric() and int(quantity) >= 0 and int(quantity) < 99999):
                 return True
             return False
 
         def quantity_with_units_length_is_valid():
+            """Checks if units length is valid.
+            
+            Returns:
+                bool: If length is valid or not.
+            """
             if units_input.get() == "none":
                 quantity = quantity_input.get()
             else:
@@ -191,6 +220,11 @@ def show_input_ingredients_screen(db_conn, username, user_id):
             return False
 
         def is_correct_date_format():
+            """Checks if date is in correct format.
+            
+            Returns:
+                bool: Is date valid.
+            """
             date = expiration_date_input.get()
             pattern = r"[0-1][0-9]\/[0-3][0-9]\/[0-2][0-2][0-9][0-9]"
             if re.match(pattern, date):
@@ -198,11 +232,19 @@ def show_input_ingredients_screen(db_conn, username, user_id):
             return False
 
         def insert_into_database(ingredient_name, expiration_date, quantity, user_id):
+            """Inserts an ingredient into the users pantry.
+            
+            Args:
+                ingredient_name (string): The name of the ingredient.
+                expiration_date (date): The expiration date.
+                quantity (int): The quantity.
+                user_id (string): The users ID.
+            """
             cursor = db_conn.cursor()
             cursor.execute("INSERT INTO ingredients (food_name, expiration_date, quantity, user_id) VALUES (?, ?, ?, ?)", (ingredient_name, expiration_date, quantity, user_id))
             db_conn.commit()
             
-            # Update table view after adding ingredient.
+            """Update table view after adding ingredient."""
             cursor.execute("SELECT food_name, expiration_date, quantity FROM ingredients WHERE user_id = ?", (user_id,))
             user_inventory = cursor.fetchall()
             for row in ingredients_table.get_children():
@@ -253,6 +295,7 @@ def show_input_ingredients_screen(db_conn, username, user_id):
     )
 
     def remove_ingredient():
+        """Removes an ingredient from a users pantry."""
         selected_ingredients = ingredients_table.selection()
         if len(selected_ingredients) == 0:
             messagebox.showinfo("Selection Required", "Select an ingredient from the table to remove it.\nHold the CTRL key to select or unselect multiple ingredients.")
